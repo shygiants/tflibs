@@ -1,6 +1,5 @@
 """
     Runner
-    ~~~~~~
 """
 
 import os

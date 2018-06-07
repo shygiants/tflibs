@@ -1,4 +1,7 @@
-""" Model """
+"""
+    Model
+    ~~~~~
+"""
 
 
 class Model:

@@ -10,7 +10,7 @@ Welcome to tftools's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   tftools
+   tflibs
 
 
 Indices and tables

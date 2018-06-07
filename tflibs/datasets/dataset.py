@@ -1,4 +1,6 @@
-""" Dataset """
+"""
+    Dataset
+"""
 
 import os
 import threading
@@ -12,6 +14,11 @@ from tflibs.datasets.feature_spec import IDSpec
 
 
 class BaseDataset:
+    """
+    A base class for defining a dataset
+
+    :param str dataset_dir: A directory where tfrecord files are stored
+    """
     def __init__(self, dataset_dir):
         self._dataset_dir = dataset_dir
 
@@ -36,9 +43,22 @@ class BaseDataset:
 
     @classmethod
     def add_arguments(cls, parser):
+        """
+        Adds arguments
+
+        :param argparse.ArgumentParser parser: Argument parser used to add arguments
+        """
         pass
 
     def write(self, collection, process_fn, num_parallel_calls=16, test_size=None):
+        """
+        Writes examples on tfrecord files
+
+        :param list collection:
+        :param function process_fn:
+        :param int num_parallel_calls:
+        :param int test_size:
+        """
         def process_wrapper(coll, thread_idx, test_size):
             # Make tfrecord writer
             fname, ext = os.path.splitext(self.tfrecord_filename)
@@ -94,6 +114,12 @@ class BaseDataset:
             thread.start()
 
     def read(self, split=None):
+        """
+        Reads tfrecord and makes it tf.data.Dataset
+
+        :param split: Split name (train or test)
+        :return: A dataset
+        """
         def parse(record):
             return map_dict(lambda k, v: (k, v.parse(k, record)), self.feature_specs)
 

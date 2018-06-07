@@ -1,4 +1,7 @@
-""" Image ops """
+"""
+    Image ops
+    ~~~~~~~~~
+"""
 
 import tensorflow as tf
 

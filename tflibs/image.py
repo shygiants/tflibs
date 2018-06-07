@@ -1,6 +1,6 @@
 """
-    Image
-    ~~~~~
+    Image utils
+    ~~~~~~~~~~~
 """
 
 import cv2

@@ -26,7 +26,7 @@ author = u'Sanghoon Yoon'
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u'0.3.1'
+release = u'0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -105,7 +105,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'tftoolsdoc'
+htmlhelp_basename = 'tflibsdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------

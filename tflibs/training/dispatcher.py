@@ -1,4 +1,6 @@
-""" Dispatcher """
+"""
+    Dispatches operations over multiple GPU devices and calculates tower loss
+"""
 
 import tensorflow as tf
 

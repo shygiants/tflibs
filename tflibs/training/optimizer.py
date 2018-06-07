@@ -1,4 +1,6 @@
-""" Optimizer """
+"""
+    Optimizer
+"""
 
 import tensorflow as tf
 

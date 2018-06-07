@@ -1,4 +1,6 @@
-""" Feature Spec """
+"""
+    Feature Spec
+"""
 
 import tensorflow as tf
 import numpy as np
@@ -88,6 +90,8 @@ class FeatureSpec:
 
 
 class IDSpec(FeatureSpec):
+    """A class for specifying unique ID.
+    """
     def __init__(self):
         FeatureSpec.__init__(self, ())
 
