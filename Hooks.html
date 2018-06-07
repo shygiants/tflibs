@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Hooks &mdash; tflibs 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tflibs.utils package" href="tflibs.utils.html" />
+    <link rel="prev" title="Optimizer" href="Optimizer.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> tflibs
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tflibs.html">tflibs package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tflibs.html#package-reference">Package Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tflibs.datasets.html">tflibs.datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tflibs.ops.html">tflibs.ops</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tflibs.runner.html">tflibs.runner</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="tflibs.training.html">tflibs.training</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="Dispatcher.html">Dispatcher</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Optimizer.html">Optimizer</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Hooks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tflibs.utils.html">tflibs.utils package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tflibs.image.html">tflibs.image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tflibs.model.html">tflibs.model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tflibs.session.html">tflibs.session</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tflibs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="tflibs.html">tflibs package</a> &raquo;</li>
+        
+          <li><a href="tflibs.training.html">tflibs.training</a> &raquo;</li>
+        
+      <li>Hooks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Hooks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-tflibs.training.hooks">
+<span id="hooks"></span><h1>Hooks<a class="headerlink" href="#module-tflibs.training.hooks" title="Permalink to this headline">¶</a></h1>
+<p>Session Run Hooks</p>
+<dl class="class">
+<dt id="tflibs.training.hooks.EvalSummaryHook">
+<em class="property">class </em><code class="descclassname">tflibs.training.hooks.</code><code class="descname">EvalSummaryHook</code><span class="sig-paren">(</span><em>summary_dir</em>, <em>summary_op=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvalSummaryHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvalSummaryHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="tflibs.training.hooks.EvalSummaryHook.after_run">
+<code class="descname">after_run</code><span class="sig-paren">(</span><em>run_context</em>, <em>run_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvalSummaryHook.after_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvalSummaryHook.after_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tflibs.training.hooks.EvalSummaryHook.before_run">
+<code class="descname">before_run</code><span class="sig-paren">(</span><em>run_context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvalSummaryHook.before_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvalSummaryHook.before_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tflibs.training.hooks.EvalSummaryHook.begin">
+<code class="descname">begin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvalSummaryHook.begin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvalSummaryHook.begin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tflibs.training.hooks.EvaluationRunHook">
+<em class="property">class </em><code class="descclassname">tflibs.training.hooks.</code><code class="descname">EvaluationRunHook</code><span class="sig-paren">(</span><em>estimator</em>, <em>input_fn</em>, <em>eval_steps</em>, <em>summary=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvaluationRunHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvaluationRunHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="tflibs.training.hooks.EvaluationRunHook.after_run">
+<code class="descname">after_run</code><span class="sig-paren">(</span><em>run_context</em>, <em>run_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvaluationRunHook.after_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvaluationRunHook.after_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tflibs.training.hooks.EvaluationRunHook.before_run">
+<code class="descname">before_run</code><span class="sig-paren">(</span><em>run_context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#EvaluationRunHook.before_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.EvaluationRunHook.before_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="tflibs.training.hooks.ImageSaverHook">
+<em class="property">class </em><code class="descclassname">tflibs.training.hooks.</code><code class="descname">ImageSaverHook</code><span class="sig-paren">(</span><em>images</em>, <em>image_dir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#ImageSaverHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.ImageSaverHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="tflibs.training.hooks.ImageSaverHook.after_run">
+<code class="descname">after_run</code><span class="sig-paren">(</span><em>run_context</em>, <em>run_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#ImageSaverHook.after_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.ImageSaverHook.after_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="tflibs.training.hooks.ImageSaverHook.before_run">
+<code class="descname">before_run</code><span class="sig-paren">(</span><em>run_context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/hooks.html#ImageSaverHook.before_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.hooks.ImageSaverHook.before_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tflibs.utils.html" class="btn btn-neutral float-right" title="tflibs.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Optimizer.html" class="btn btn-neutral" title="Optimizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Sanghoon Yoon.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

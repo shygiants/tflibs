@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tflibs.datasets.feature_spec &mdash; tflibs 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tflibs
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tflibs.html">tflibs package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tflibs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tflibs.datasets.feature_spec</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tflibs.datasets.feature_spec</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature Spec</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">tflibs.utils</span> <span class="k">import</span> <span class="n">map_dict</span>
+<span class="kn">from</span> <span class="nn">tflibs</span> <span class="k">import</span> <span class="n">image</span> <span class="k">as</span> <span class="n">tfimage</span>
+
+
+<div class="viewcode-block" id="FeatureSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.FeatureSpec">[docs]</a><span class="k">class</span> <span class="nc">FeatureSpec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A class for specifying `Feature` proto.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_int64_feature</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a TF-Feature of int64s.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          values: A scalar or list of values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          A TF-Feature.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">int64_list</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Int64List</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">values</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_bytes_feature</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a TF-Feature of bytes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            values: A string.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A TF-Feature.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">bytes_list</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">BytesList</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="n">values</span><span class="p">]))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_float_feature</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a TF-Feature of floats.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            values: A scalar of list of values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A TF-Feature.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">float_list</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">FloatList</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">values</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="n">shape</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="FeatureSpec.feature_proto"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.FeatureSpec.feature_proto">[docs]</a>    <span class="k">def</span> <span class="nf">feature_proto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_dict</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">map_fn</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">_bytes_feature</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float16</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">_float_feature</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">int8</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">int16</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">int32</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">_int64_feature</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">map_dict</span><span class="p">(</span><span class="n">map_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_proto_spec</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FeatureSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.FeatureSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenFeature</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">])</span>
+
+        <span class="n">features</span> <span class="o">=</span> <span class="n">map_dict</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_proto_spec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">parse_single_example</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="IDSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.IDSpec">[docs]</a><span class="k">class</span> <span class="nc">IDSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A class for specifying unique ID.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(),</span>
+                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="IDSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.IDSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/_id&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="IDSpec.create_with_string"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.IDSpec.create_with_string">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="n">string</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="ImageSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec">[docs]</a><span class="k">class</span> <span class="nc">ImageSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_size</span><span class="p">):</span>
+        <span class="n">image_size</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">image_size</span><span class="p">)</span>
+        <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_size</span> <span class="o">+</span> <span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;encoded&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(),</span>
+                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="ImageSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
+        <span class="n">decoded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">decode_image</span><span class="p">(</span><span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="s1">&#39;encoded&#39;</span><span class="p">)],</span> <span class="n">channels</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">decoded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">decoded</span></div>
+
+<div class="viewcode-block" id="ImageSpec.create_with_path"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec.create_with_path">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="c1"># TODO: Assert shape</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;encoded&#39;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="p">}</span></div>
+
+<div class="viewcode-block" id="ImageSpec.create_with_tensor"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec.create_with_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+        <span class="c1"># TODO: Assert shape</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;encoded&#39;</span><span class="p">:</span> <span class="n">tfimage</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="ImageSpec.create_with_contents"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec.create_with_contents">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_contents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contents</span><span class="p">):</span>
+        <span class="c1"># TODO: Assert shape</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;encoded&#39;</span><span class="p">:</span> <span class="n">contents</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="LabelSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec">[docs]</a><span class="k">class</span> <span class="nc">LabelSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="n">depth</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span> <span class="o">=</span> <span class="n">class_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(),</span>
+                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="LabelSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="LabelSpec.create_with_index"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec.create_with_index">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="LabelSpec.from_class_names"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec.from_class_names">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_class_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_names</span><span class="p">),</span> <span class="n">class_names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obj</span></div></div>
+
+
+<div class="viewcode-block" id="MultiLabelSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec">[docs]</a><span class="k">class</span> <span class="nc">MultiLabelSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="n">depth</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span> <span class="o">=</span> <span class="n">class_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;tensor&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="s1">&#39;dtype&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="MultiLabelSpec.from_class_names"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.from_class_names">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_class_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_names</span><span class="p">),</span> <span class="n">class_names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+<div class="viewcode-block" id="MultiLabelSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="s1">&#39;tensor&#39;</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="MultiLabelSpec.create_with_tensor"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.create_with_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+        <span class="c1"># TODO: Assert shape</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;tensor&#39;</span><span class="p">:</span> <span class="n">tensor</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="MultiLabelSpec.create_with_labels"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.create_with_labels">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="c1"># TODO: Assert bad labels don&#39;t exist</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;tensor&#39;</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="bp">cls</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span><span class="p">)</span>
+        <span class="p">}</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Sanghoon Yoon.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tflibs.runner.initializer &mdash; tflibs 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tflibs
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tflibs.html">tflibs package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tflibs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tflibs.runner.initializer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tflibs.runner.initializer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializers for runner</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">tflibs.utils</span> <span class="k">import</span> <span class="n">list_modules</span><span class="p">,</span> <span class="n">import_module</span><span class="p">,</span> <span class="n">log_parse_args</span>
+
+
+<div class="viewcode-block" id="BaseInitializer"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.BaseInitializer">[docs]</a><span class="k">class</span> <span class="nc">BaseInitializer</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.BaseInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="BaseInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.BaseInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+
+
+<div class="viewcode-block" id="DatasetInitializer"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.DatasetInitializer">[docs]</a><span class="k">class</span> <span class="nc">DatasetInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_pkg</span><span class="o">=</span><span class="s1">&#39;datasets.dataset&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_pkg</span> <span class="o">=</span> <span class="n">dataset_pkg</span>
+
+    <span class="k">def</span> <span class="nf">_list_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">list_modules</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_pkg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_dataset_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_pkg</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">export</span>
+
+<div class="viewcode-block" id="DatasetInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.DatasetInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dataset-dir&#39;</span><span class="p">,</span>
+                               <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The directory where the dataset files are stored.&#39;</span><span class="p">)</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dataset-name&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The name of a dataset.&#39;</span><span class="p">,</span>
+                               <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_datasets</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="DatasetInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.DatasetInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="n">dataset_name</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">dataset_name</span>
+        <span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">dataset_dir</span>
+
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">dataset_name</span>
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">dataset_dir</span>
+
+        <span class="n">dataset_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_factory</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">)</span>
+
+        <span class="c1"># Parse dataset-specific arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="n">dataset_cls</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">parse_args</span><span class="p">)</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset_cls</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">,</span> <span class="o">**</span><span class="nb">vars</span><span class="p">(</span><span class="n">parse_args</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;dataset&#39;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">},</span> <span class="n">unknown</span></div></div>
+
+
+<div class="viewcode-block" id="ModelInitializer"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.ModelInitializer">[docs]</a><span class="k">class</span> <span class="nc">ModelInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_pkg</span><span class="o">=</span><span class="s1">&#39;models&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_pkg</span> <span class="o">=</span> <span class="n">model_pkg</span>
+
+    <span class="k">def</span> <span class="nf">_model_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_pkg</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">export</span>
+
+    <span class="k">def</span> <span class="nf">_list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">list_modules</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_pkg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.ModelInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--model-name&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The name of the model to use.&#39;</span><span class="p">,</span>
+                               <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_models</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ModelInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.ModelInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">model_name</span>
+
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">model_name</span>
+
+        <span class="n">model_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_factory</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;model_cls&#39;</span><span class="p">:</span> <span class="n">model_cls</span><span class="p">},</span> <span class="n">unknown</span></div></div>
+
+
+<div class="viewcode-block" id="TrainInitializer"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.TrainInitializer">[docs]</a><span class="k">class</span> <span class="nc">TrainInitializer</span><span class="p">(</span><span class="n">ModelInitializer</span><span class="p">):</span>
+<div class="viewcode-block" id="TrainInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.TrainInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="n">ModelInitializer</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">)</span>
+
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--save-steps&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The number of steps to save the model.&#39;</span><span class="p">)</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--keep-checkpoint-max&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The maximum number of checkpoint file to keep.&#39;</span><span class="p">)</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--log-steps&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The number of steps to log the progress.&#39;</span><span class="p">)</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--random-seed&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Random seed&#39;</span><span class="p">)</span>
+        <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--train-iters&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mi">200000</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum number of training iterations to perform.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TrainInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.TrainInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="n">handled_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">ModelInitializer</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">)</span>
+
+        <span class="n">model_cls</span> <span class="o">=</span> <span class="n">handled_args</span><span class="p">[</span><span class="s1">&#39;model_cls&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Parse model-specific arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="n">model_cls</span><span class="o">.</span><span class="n">add_model_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
+        <span class="n">model_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">model_args</span><span class="p">)</span>
+
+        <span class="c1"># Parse model-specific train arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="n">model_cls</span><span class="o">.</span><span class="n">add_train_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
+        <span class="n">train_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">train_args</span><span class="p">)</span>
+
+        <span class="c1"># Parse model-specific eval arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="n">model_cls</span><span class="o">.</span><span class="n">add_eval_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
+        <span class="n">eval_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">eval_args</span><span class="p">)</span>
+
+        <span class="n">train_args</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">train_args</span><span class="p">)</span>
+        <span class="n">train_args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;train_iters&#39;</span><span class="p">:</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">train_iters</span><span class="p">})</span>
+
+        <span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;model_args&#39;</span><span class="p">:</span> <span class="nb">vars</span><span class="p">(</span><span class="n">model_args</span><span class="p">),</span>
+            <span class="s1">&#39;train_args&#39;</span><span class="p">:</span> <span class="n">train_args</span><span class="p">,</span>
+            <span class="s1">&#39;eval_args&#39;</span><span class="p">:</span> <span class="nb">vars</span><span class="p">(</span><span class="n">eval_args</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="n">save_steps</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">save_steps</span>
+        <span class="n">log_steps</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">log_steps</span><span class="p">,</span>
+        <span class="n">keep_checkpoint_max</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">keep_checkpoint_max</span>
+        <span class="n">random_seed</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">random_seed</span>
+
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">save_steps</span>
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">log_steps</span><span class="p">,</span>
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">keep_checkpoint_max</span>
+        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">random_seed</span>
+
+        <span class="n">session_config</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ConfigProto</span><span class="p">(</span><span class="n">log_device_placement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">allow_soft_placement</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">run_config</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">RunConfig</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">session_config</span><span class="o">=</span><span class="n">session_config</span><span class="p">,</span>
+                                                      <span class="n">save_summary_steps</span><span class="o">=</span><span class="n">save_steps</span><span class="p">,</span>
+                                                      <span class="n">save_checkpoints_steps</span><span class="o">=</span><span class="n">save_steps</span><span class="p">,</span>
+                                                      <span class="n">log_step_count_steps</span><span class="o">=</span><span class="n">log_steps</span><span class="p">,</span>
+                                                      <span class="n">keep_checkpoint_max</span><span class="o">=</span><span class="n">keep_checkpoint_max</span><span class="p">,</span>
+                                                      <span class="n">tf_random_seed</span><span class="o">=</span><span class="n">random_seed</span><span class="p">)</span>
+
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">Estimator</span><span class="p">(</span>
+            <span class="n">model_cls</span><span class="o">.</span><span class="n">model_fn</span><span class="p">,</span>
+            <span class="n">model_dir</span><span class="o">=</span><span class="n">parse_args</span><span class="o">.</span><span class="n">job_dir</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">run_config</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">model_params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;estimator&#39;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">},</span> <span class="n">unknown</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Sanghoon Yoon.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
