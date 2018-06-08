@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='tflibs',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    version='0.1.2',
+    version='0.1.3',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',
