@@ -28,6 +28,14 @@ class DatasetInitializer(BaseInitializer):
         return import_module(self._dataset_pkg, name).export
 
     def add_arguments(self, argparser):
+        """
+        Adds arguments
+
+        * --dataset-dir
+        * --dataset-name
+
+        :param argparse.ArgumentParser argparser: Argument parser used to add arguments
+        """
         argparser.add_argument('--dataset-dir',
                                required=True,
                                type=str,
@@ -38,6 +46,20 @@ class DatasetInitializer(BaseInitializer):
                                choices=self._list_datasets())
 
     def handle(self, parse_args, unknown):
+        """
+        Handles arguments.
+
+        Exhausts `--dataset-name` and `--dataset-dir`, and generates `dataset`.
+
+        Parses dataset-specific arguments.
+
+        See: `tflib.datasets.BaseDataset.add_arguments() <./Dataset.html#tflibs.datasets.dataset.BaseDataset.add_arguments>`_
+
+        :param argparse.Namespace parse_args: Parsed arguments.
+        :param list unknown: A list of unknown arguments. Exhaust these list.
+        :return: A tuple of a dict of handled arguments and unknown arguments.
+        :rtype: tuple
+        """
         dataset_name = parse_args.dataset_name
         dataset_dir = parse_args.dataset_dir
 
@@ -68,12 +90,29 @@ class ModelInitializer(BaseInitializer):
         return list_modules(self._model_pkg)
 
     def add_arguments(self, argparser):
+        """
+        Adds arguments.
+
+        * --model-name
+
+        :param argparse.ArgumentParser argparser: Argument parser used to add arguments.
+        """
         argparser.add_argument('--model-name',
                                type=str,
                                help='The name of the model to use.',
                                choices=self._list_models())
 
     def handle(self, parse_args, unknown):
+        """
+        Handles arguments.
+
+        Exhausts `--model-name` and generates `model_cls`.
+
+        :param argparse.Namespace parse_args: Parsed arguments.
+        :param list unknown: A list of unknown arguments. Exhaust these list.
+        :return: A tuple of a dict of handled arguments and unknown arguments.
+        :rtype: tuple
+        """
         model_name = parse_args.model_name
 
         del parse_args.model_name
@@ -85,6 +124,23 @@ class ModelInitializer(BaseInitializer):
 
 class TrainInitializer(ModelInitializer):
     def add_arguments(self, argparser):
+        """
+        Adds arguments.
+
+        Adds arguments of `ModelInitializer`.
+
+        * --model-name
+
+        and
+
+        * --save-steps
+        * --keep-checkpoint-max
+        * --log-steps
+        * --random-seed
+        * --train-iters
+
+        :param argparse.ArgumentParser argparser: Argument parser used to add arguments.
+        """
         ModelInitializer.add_arguments(self, argparser)
 
         argparser.add_argument('--save-steps',
@@ -109,6 +165,20 @@ class TrainInitializer(ModelInitializer):
                                help='Maximum number of training iterations to perform.')
 
     def handle(self, parse_args, unknown):
+        """
+        Handles arguments.
+
+        Parses model-specific arguments.
+
+        * model_args: Common arguments. See: `tflib.model.Model.add_model_args() <./tflibs.model.html#tflibs.model.Model.add_model_args>`_
+        * train_args: Train arguments. See: `tflib.model.Model.add_train_args() <./tflibs.model.html#tflibs.model.Model.add_train_args>`_
+        * eval_args: Evaluation arguments. See: `tflib.model.Model.add_eval_args() <./tflibs.model.html#tflibs.model.Model.add_eval_args>`_
+
+        :param argparse.Namespace parse_args: Parsed arguments.
+        :param list unknown: A list of unknown arguments. Exhaust these list.
+        :return: A tuple of a dict of handled arguments and unknown arguments.
+        :rtype: tuple
+        """
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
         model_cls = handled_args['model_cls']

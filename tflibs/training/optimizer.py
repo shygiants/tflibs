@@ -40,6 +40,13 @@ class Optimizer:
         return self.apply_gradients(grads)
 
     def compute_grad(self, loss):
+        """
+        Computes gradients of trainable variables with regard to a loss given.
+
+        :param tf.Tensor loss: A `tf.Tensor` of a loss.
+        :return: A list of tuples containing gradients and corresponding variables.
+        :rtype: list
+        """
         return self.optimizer.compute_gradients(loss, var_list=self.var_list)
 
     def apply_gradients(self, grads_and_vars):
@@ -47,6 +54,13 @@ class Optimizer:
         return self.optimizer.apply_gradients(grads_and_vars)
 
     def apply_tower_gradients(self, tower_grads):
+        """
+        Returns average gradients.
+
+        :param list tower_grads: A list of tuples containing gradients and corresponding variables.
+        :return: Applying gradients operation
+        :rtype: tf.Operation
+        """
         avg_grad = self._average_gradients(tower_grads)
         apply_grad_op = self.apply_gradients(avg_grad)
         return apply_grad_op

@@ -125,7 +125,7 @@ class BaseDataset:
         """
         Adds arguments.
 
-        Called when `tflibs.runner.DatasetInitializer` creates a dataset object.
+        Called when `tflibs.runner.DatasetInitializer <./Initializers.html#tflibs.runner.initializer.DatasetInitializer>`_ creates a dataset object.
 
         :param argparse.ArgumentParser parser: Argument parser used to add arguments
         """

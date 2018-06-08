@@ -8,6 +8,15 @@ from tflibs.utils import map_dict, device_setter
 
 
 class Dispatcher:
+    """
+    A class for dispatching operations over multiple GPU devices and caculating tower loss
+
+    :param class model_cls: Model class.
+    :param dict model_param: A dict of model parameters.
+    :param list gpus: A list of gpu ids.
+    :param dict features: A dict of `tf.Tensor` containing feature values.
+    :param tf.Tensor labels: A `tf.Tensor` of labels.
+    """
     def __init__(self, model_cls, model_param, gpus, features, labels):
         num_gpus = len(gpus)
 
@@ -22,6 +31,15 @@ class Dispatcher:
                            zip(gpus, split_features, split_labels))
 
     def minimize(self, optimizer, loss_fn, depends=None):
+        """
+        Gets `loss_fn` which maps model object to loss tensor, caculates tower loss and minimize it.
+
+        :param tflibs.training.Optimizer optimizer: An optimizer.
+        :param function loss_fn: A function that maps model object to loss tensor.
+        :param tf.Operation depends: An operation that should be run before running an optimization.
+        :return: Train op.
+        :rtype: tf.Operation
+        """
         if not isinstance(depends, (tuple, list)):
             depends = [depends] if depends is not None else None
         with tf.control_dependencies(depends):
