@@ -143,7 +143,7 @@
             
   <h1>Source code for tflibs.datasets.feature_spec</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Feature Spec</span>
+<span class="sd">    See the guides: `Dataset &lt;./Dataset.html&gt;`_</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
@@ -154,18 +154,17 @@
 
 
 <div class="viewcode-block" id="FeatureSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.FeatureSpec">[docs]</a><span class="k">class</span> <span class="nc">FeatureSpec</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;A class for specifying `Feature` proto.</span>
+    <span class="sd">&quot;&quot;&quot;A class for specifying feature specs of a `tflibs.datasets.BaseDataset &lt;./Dataset.html&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_int64_feature</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns a TF-Feature of int64s.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a TF-Feature of int64s.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">          values: A scalar or list of values.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">          A TF-Feature.</span>
+<span class="sd">        :param int or list values: A int values.</span>
+<span class="sd">        :return: A TF-Feature proto.</span>
+<span class="sd">        :rtype: tf.train.Feature</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
@@ -173,25 +172,23 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_bytes_feature</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns a TF-Feature of bytes.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a TF-Feature of bytes.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            values: A string.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            A TF-Feature.</span>
+<span class="sd">        :param str values: A string.</span>
+<span class="sd">        :return: A TF-Feature proto.</span>
+<span class="sd">        :rtype: tf.train.Feature</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">bytes_list</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">BytesList</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="n">values</span><span class="p">]))</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_float_feature</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns a TF-Feature of floats.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a TF-Feature of floats.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            values: A scalar of list of values.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            A TF-Feature.</span>
+<span class="sd">        :param float or list values: A scalar of list of values.</span>
+<span class="sd">        :return: A TF-Feature proto.</span>
+<span class="sd">        :rtype: tf.train.Feature</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">]</span>
@@ -206,9 +203,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A property for specifying inner encoding spec of the feature</span>
+
+<span class="sd">        :return: The dict containing shape and dtype info</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
 <div class="viewcode-block" id="FeatureSpec.feature_proto"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.FeatureSpec.feature_proto">[docs]</a>    <span class="k">def</span> <span class="nf">feature_proto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dict of `tf.train.Feature` proto corresponding to `feature_proto_spec`</span>
+
+<span class="sd">        :param dict value_dict: A dict containing values of `feature_proto_spec`</span>
+<span class="sd">        :return: A dict of `tf.train.Feature`</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">map_fn</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
             <span class="n">dtype</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">]</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">value_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
@@ -226,6 +236,14 @@
         <span class="k">return</span> <span class="n">map_dict</span><span class="p">(</span><span class="n">map_fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_proto_spec</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FeatureSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.FeatureSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse TF-record and returns dict of `tf.Tensor`</span>
+
+<span class="sd">        :param str parent_key: The key of the feature</span>
+<span class="sd">        :param tf.Tensor record: String tensor of TF-record</span>
+<span class="sd">        :return: A dict of tensors as specified at `feature_proto_spec`</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
             <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">FixedLenFeature</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="s1">&#39;dtype&#39;</span><span class="p">])</span>
 
@@ -241,6 +259,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A property for specifying inner encoding spec of the feature</span>
+
+<span class="sd">        :return: The dict containing shape and dtype info</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(),</span>
@@ -249,6 +273,14 @@
         <span class="p">}</span>
 
 <div class="viewcode-block" id="IDSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.IDSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse TF-record and returns `tf.Tensor`</span>
+
+<span class="sd">        :param str parent_key: The key of the feature</span>
+<span class="sd">        :param tf.Tensor record: String tensor of TF-record</span>
+<span class="sd">        :return: A scalar tensor containing an id</span>
+<span class="sd">        :rtype: tf.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/_id&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">)]</span></div>
@@ -260,12 +292,23 @@
 
 
 <div class="viewcode-block" id="ImageSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec">[docs]</a><span class="k">class</span> <span class="nc">ImageSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for specifying image spec</span>
+
+<span class="sd">    :param list|tuple image_size: The sizes of images</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_size</span><span class="p">):</span>
         <span class="n">image_size</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">image_size</span><span class="p">)</span>
         <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_size</span> <span class="o">+</span> <span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A property for specifying inner encoding spec of the feature</span>
+
+<span class="sd">        :return: The dict containing shape and dtype info</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;encoded&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(),</span>
@@ -274,6 +317,14 @@
         <span class="p">}</span>
 
 <div class="viewcode-block" id="ImageSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.ImageSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse TF-record and returns `tf.Tensor`</span>
+
+<span class="sd">        :param str parent_key: The key of the feature</span>
+<span class="sd">        :param tf.Tensor record: String tensor of TF-record</span>
+<span class="sd">        :return: A 3-D tensor containing an image</span>
+<span class="sd">        :rtype: tf.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
         <span class="n">decoded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">decode_image</span><span class="p">(</span><span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="s1">&#39;encoded&#39;</span><span class="p">)],</span> <span class="n">channels</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">decoded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">decoded</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -302,12 +353,24 @@
 
 
 <div class="viewcode-block" id="LabelSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec">[docs]</a><span class="k">class</span> <span class="nc">LabelSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for specifying one-hot label spec</span>
+
+<span class="sd">    :param int depth: The number of labels</span>
+<span class="sd">    :param list class_names: A list of `str` which describes each labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="n">depth</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span> <span class="o">=</span> <span class="n">class_names</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A property for specifying inner encoding spec of the feature</span>
+
+<span class="sd">        :return: The dict containing shape and dtype info</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(),</span>
@@ -316,6 +379,14 @@
         <span class="p">}</span>
 
 <div class="viewcode-block" id="LabelSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse TF-record and returns `tf.Tensor`</span>
+
+<span class="sd">        :param str parent_key: The key of the feature</span>
+<span class="sd">        :param tf.Tensor record: String tensor of TF-record</span>
+<span class="sd">        :return: An 1-D tensor containing label</span>
+<span class="sd">        :rtype: tf.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
@@ -327,20 +398,45 @@
             <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span>
         <span class="p">}</span></div>
 
+<div class="viewcode-block" id="LabelSpec.create_with_label"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec.create_with_label">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+        <span class="c1"># TODO: Assert bad labels don&#39;t exist</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="p">}</span></div>
+
 <div class="viewcode-block" id="LabelSpec.from_class_names"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.LabelSpec.from_class_names">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_class_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create `LabelSpec` object from a list of names specifying each classes</span>
+
+<span class="sd">        :param list class_names: A list of names specifying each classes</span>
+<span class="sd">        :return: `LabelSpec` object</span>
+<span class="sd">        :rtype: LabelSpec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_names</span><span class="p">),</span> <span class="n">class_names</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">obj</span></div></div>
 
 
 <div class="viewcode-block" id="MultiLabelSpec"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec">[docs]</a><span class="k">class</span> <span class="nc">MultiLabelSpec</span><span class="p">(</span><span class="n">FeatureSpec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for specifying multi-label spec</span>
+
+<span class="sd">    :param int depth: The number of labels</span>
+<span class="sd">    :param list class_names: A list of `str` which describes each labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">FeatureSpec</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="n">depth</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span> <span class="o">=</span> <span class="n">class_names</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">feature_proto_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A property for specifying inner encoding spec of the feature</span>
+
+<span class="sd">        :return: The dict containing shape and dtype info</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;tensor&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
@@ -350,11 +446,26 @@
 
 <div class="viewcode-block" id="MultiLabelSpec.from_class_names"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.from_class_names">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_class_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">class_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create `MultiLabelSpec` object from a list of names specifying each classes</span>
+
+<span class="sd">        :param list class_names: A list of names specifying each classes</span>
+<span class="sd">        :return: `MultiLabelSpec` object</span>
+<span class="sd">        :rtype: MultiLabelSpec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_names</span><span class="p">),</span> <span class="n">class_names</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">obj</span></div>
 
 <div class="viewcode-block" id="MultiLabelSpec.parse"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse TF-record and returns `tf.Tensor`</span>
+
+<span class="sd">        :param str parent_key: The key of the feature</span>
+<span class="sd">        :param tf.Tensor record: String tensor of TF-record</span>
+<span class="sd">        :return: A 1-D tensor containing label</span>
+<span class="sd">        :rtype: tf.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parsed</span> <span class="o">=</span> <span class="n">FeatureSpec</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_key</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">parsed</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent_key</span><span class="p">,</span> <span class="s1">&#39;tensor&#39;</span><span class="p">)]</span></div>

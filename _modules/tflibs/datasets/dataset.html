@@ -143,7 +143,78 @@
             
   <h1>Source code for tflibs.datasets.dataset</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Dataset</span>
+<span class="sd">    When defining a dataset, a class that inherits `tflibs.datasets.BaseDataset` should be defined.</span>
+
+<span class="sd">    The following is an example of a definition.</span>
+
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; from tflibs.datasets import ImageSpec, LabelSpec</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; class CatDogDataset(BaseDataset):</span>
+<span class="sd">    &gt;&gt;&gt;     def __init__(self, dataset_dir, image_size):</span>
+<span class="sd">    &gt;&gt;&gt;         self._image_size = image_size</span>
+<span class="sd">    &gt;&gt;&gt;         BaseDataset.__init__(self, os.path.join(dataset_dir, &#39;cat_dog&#39;))</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt;     @property</span>
+<span class="sd">    &gt;&gt;&gt;     def tfrecord_filename(self):</span>
+<span class="sd">    &gt;&gt;&gt;         return &#39;cat_dog.tfrecord&#39;</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt;     def _init_feature_specs(self):</span>
+<span class="sd">    &gt;&gt;&gt;         return {</span>
+<span class="sd">    &gt;&gt;&gt;             &#39;image&#39;: ImageSpec([self._image_size] * 2),</span>
+<span class="sd">    &gt;&gt;&gt;             &#39;label&#39;: LabelSpec(3, class_names=[&#39;Cat&#39;, &#39;Dog&#39;, &#39;Cookie&#39;])</span>
+<span class="sd">    &gt;&gt;&gt;         }</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt;     @classmethod</span>
+<span class="sd">    &gt;&gt;&gt;     def add_arguments(cls, parser):</span>
+<span class="sd">    &gt;&gt;&gt;         parser.add_argument(&#39;--image-size&#39;,</span>
+<span class="sd">    &gt;&gt;&gt;                             type=int,</span>
+<span class="sd">    &gt;&gt;&gt;                             default=128,</span>
+<span class="sd">    &gt;&gt;&gt;                             help=&#39;The size of output image.&#39;)</span>
+
+<span class="sd">    When writing TF-record files, create dataset object and call `write()`.</span>
+
+<span class="sd">    &gt;&gt;&gt; dataset = CatDogDataset(&#39;/tmp/dataset&#39;, 64)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; images = [&#39;/cat/abc.jpg&#39;, &#39;/dog/def.jpg&#39;, &#39;/cookie/ghi.jpg&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; labels = [&#39;Cat&#39;, &#39;Dog&#39;, &#39;Cookie&#39;]</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; def process_fn((image_path, label_str), feature_specs):</span>
+<span class="sd">    &gt;&gt;&gt;     id_string = os.path.splitext(os.path.basename(image_path))[0]</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt;     def build_example(_id, image, label):</span>
+<span class="sd">    &gt;&gt;&gt;         return {</span>
+<span class="sd">    &gt;&gt;&gt;             &#39;_id&#39;: _id.create_with_string(id_string),</span>
+<span class="sd">    &gt;&gt;&gt;             &#39;image&#39;: image.create_with_path(image_path),</span>
+<span class="sd">    &gt;&gt;&gt;             &#39;label&#39;: label.create_with_label(label_str),</span>
+<span class="sd">    &gt;&gt;&gt;         }</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt;     return build_example(**feature_specs)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; dataset.write(zip(images, labels), process_fn)</span>
+
+<span class="sd">    When reading TF-record files, create dataset object and call `read()`.</span>
+
+<span class="sd">    &gt;&gt;&gt; dataset = CatDogDataset(&#39;/tmp/dataset&#39;, 64)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Returns a `tf.data.Dataset`</span>
+<span class="sd">    &gt;&gt;&gt; # {</span>
+<span class="sd">    &gt;&gt;&gt; #   &#39;_id&#39;: {</span>
+<span class="sd">    &gt;&gt;&gt; #       &#39;dtype&#39;: tf.string,</span>
+<span class="sd">    &gt;&gt;&gt; #       &#39;shape&#39;: (),</span>
+<span class="sd">    &gt;&gt;&gt; #   },</span>
+<span class="sd">    &gt;&gt;&gt; #   &#39;image&#39;: {</span>
+<span class="sd">    &gt;&gt;&gt; #       &#39;dtype&#39;: tf.uint8,</span>
+<span class="sd">    &gt;&gt;&gt; #       &#39;shape&#39;: [64, 64, 3],</span>
+<span class="sd">    &gt;&gt;&gt; #   },</span>
+<span class="sd">    &gt;&gt;&gt; #   &#39;label&#39;: {</span>
+<span class="sd">    &gt;&gt;&gt; #       &#39;dtype&#39;: tf.int64,</span>
+<span class="sd">    &gt;&gt;&gt; #       &#39;shape&#39;: [3],</span>
+<span class="sd">    &gt;&gt;&gt; #   }</span>
+<span class="sd">    &gt;&gt;&gt; # }</span>
+<span class="sd">    &gt;&gt;&gt; tfdataset = dataset.read()</span>
+
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -180,6 +251,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tfrecord_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        It should return the name of TF-record file.</span>
+
+<span class="sd">        This should be implemented when defining a dataset.</span>
+
+<span class="sd">        :return: TF-record filename</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">def</span> <span class="nf">_init_feature_specs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -188,7 +267,9 @@
 <div class="viewcode-block" id="BaseDataset.add_arguments"><a class="viewcode-back" href="../../../Dataset.html#tflibs.datasets.dataset.BaseDataset.add_arguments">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds arguments</span>
+<span class="sd">        Adds arguments.</span>
+
+<span class="sd">        Called when `tflibs.runner.DatasetInitializer` creates a dataset object.</span>
 
 <span class="sd">        :param argparse.ArgumentParser parser: Argument parser used to add arguments</span>
 <span class="sd">        &quot;&quot;&quot;</span>
