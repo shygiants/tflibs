@@ -17,7 +17,7 @@
     >>>
     >>>     def _init_feature_specs(self):
     >>>         return {
-    >>>             'image': ImageSpec([self._image_size] * 2),
+    >>>             'image': ImageSpec([self._image_size, self._image_size, 3]),
     >>>             'label': LabelSpec(3, class_names=['Cat', 'Dog', 'Cookie'])
     >>>         }
     >>>

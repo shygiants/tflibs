@@ -155,7 +155,7 @@ class ImageSpec(FeatureSpec):
     """
     def __init__(self, image_size):
         image_size = list(image_size)
-        FeatureSpec.__init__(self, image_size + [3])
+        FeatureSpec.__init__(self, image_size)
 
     @property
     def feature_proto_spec(self):
