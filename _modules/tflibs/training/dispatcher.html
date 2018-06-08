@@ -152,6 +152,15 @@
 
 
 <div class="viewcode-block" id="Dispatcher"><a class="viewcode-back" href="../../../Dispatcher.html#tflibs.training.dispatcher.Dispatcher">[docs]</a><span class="k">class</span> <span class="nc">Dispatcher</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for dispatching operations over multiple GPU devices and caculating tower loss</span>
+
+<span class="sd">    :param class model_cls: Model class.</span>
+<span class="sd">    :param dict model_param: A dict of model parameters.</span>
+<span class="sd">    :param list gpus: A list of gpu ids.</span>
+<span class="sd">    :param dict features: A dict of `tf.Tensor` containing feature values.</span>
+<span class="sd">    :param tf.Tensor labels: A `tf.Tensor` of labels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_cls</span><span class="p">,</span> <span class="n">model_param</span><span class="p">,</span> <span class="n">gpus</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
         <span class="n">num_gpus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gpus</span><span class="p">)</span>
 
@@ -166,6 +175,15 @@
                            <span class="nb">zip</span><span class="p">(</span><span class="n">gpus</span><span class="p">,</span> <span class="n">split_features</span><span class="p">,</span> <span class="n">split_labels</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Dispatcher.minimize"><a class="viewcode-back" href="../../../Dispatcher.html#tflibs.training.dispatcher.Dispatcher.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">depends</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets `loss_fn` which maps model object to loss tensor, caculates tower loss and minimize it.</span>
+
+<span class="sd">        :param tflibs.training.Optimizer optimizer: An optimizer.</span>
+<span class="sd">        :param function loss_fn: A function that maps model object to loss tensor.</span>
+<span class="sd">        :param tf.Operation depends: An operation that should be run before running an optimization.</span>
+<span class="sd">        :return: Train op.</span>
+<span class="sd">        :rtype: tf.Operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">depends</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="n">depends</span> <span class="o">=</span> <span class="p">[</span><span class="n">depends</span><span class="p">]</span> <span class="k">if</span> <span class="n">depends</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">(</span><span class="n">depends</span><span class="p">):</span>

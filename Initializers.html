@@ -191,12 +191,47 @@
 <dl class="method">
 <dt id="tflibs.runner.initializer.DatasetInitializer.add_arguments">
 <code class="descname">add_arguments</code><span class="sig-paren">(</span><em>argparser</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/runner/initializer.html#DatasetInitializer.add_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.runner.initializer.DatasetInitializer.add_arguments" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Adds arguments</p>
+<ul class="simple">
+<li>–dataset-dir</li>
+<li>–dataset-name</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argparser</strong> (<em>argparse.ArgumentParser</em>) – Argument parser used to add arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="tflibs.runner.initializer.DatasetInitializer.handle">
 <code class="descname">handle</code><span class="sig-paren">(</span><em>parse_args</em>, <em>unknown</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/runner/initializer.html#DatasetInitializer.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.runner.initializer.DatasetInitializer.handle" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handles arguments.</p>
+<p>Exhausts <cite>–dataset-name</cite> and <cite>–dataset-dir</cite>, and generates <cite>dataset</cite>.</p>
+<p>Parses dataset-specific arguments.</p>
+<p>See: <a class="reference external" href="./Dataset.html#tflibs.datasets.dataset.BaseDataset.add_arguments">tflib.datasets.BaseDataset.add_arguments()</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parse_args</strong> (<em>argparse.Namespace</em>) – Parsed arguments.</li>
+<li><strong>unknown</strong> (<em>list</em>) – A list of unknown arguments. Exhaust these list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tuple of a dict of handled arguments and unknown arguments.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -207,12 +242,44 @@
 <dl class="method">
 <dt id="tflibs.runner.initializer.ModelInitializer.add_arguments">
 <code class="descname">add_arguments</code><span class="sig-paren">(</span><em>argparser</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/runner/initializer.html#ModelInitializer.add_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.runner.initializer.ModelInitializer.add_arguments" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Adds arguments.</p>
+<ul class="simple">
+<li>–model-name</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argparser</strong> (<em>argparse.ArgumentParser</em>) – Argument parser used to add arguments.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="tflibs.runner.initializer.ModelInitializer.handle">
 <code class="descname">handle</code><span class="sig-paren">(</span><em>parse_args</em>, <em>unknown</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/runner/initializer.html#ModelInitializer.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.runner.initializer.ModelInitializer.handle" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handles arguments.</p>
+<p>Exhausts <cite>–model-name</cite> and generates <cite>model_cls</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parse_args</strong> (<em>argparse.Namespace</em>) – Parsed arguments.</li>
+<li><strong>unknown</strong> (<em>list</em>) – A list of unknown arguments. Exhaust these list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tuple of a dict of handled arguments and unknown arguments.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -223,12 +290,58 @@
 <dl class="method">
 <dt id="tflibs.runner.initializer.TrainInitializer.add_arguments">
 <code class="descname">add_arguments</code><span class="sig-paren">(</span><em>argparser</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/runner/initializer.html#TrainInitializer.add_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.runner.initializer.TrainInitializer.add_arguments" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Adds arguments.</p>
+<p>Adds arguments of <cite>ModelInitializer</cite>.</p>
+<ul class="simple">
+<li>–model-name</li>
+</ul>
+<p>and</p>
+<ul class="simple">
+<li>–save-steps</li>
+<li>–keep-checkpoint-max</li>
+<li>–log-steps</li>
+<li>–random-seed</li>
+<li>–train-iters</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argparser</strong> (<em>argparse.ArgumentParser</em>) – Argument parser used to add arguments.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="tflibs.runner.initializer.TrainInitializer.handle">
 <code class="descname">handle</code><span class="sig-paren">(</span><em>parse_args</em>, <em>unknown</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/runner/initializer.html#TrainInitializer.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.runner.initializer.TrainInitializer.handle" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handles arguments.</p>
+<p>Parses model-specific arguments.</p>
+<ul class="simple">
+<li>model_args: Common arguments. See: <a class="reference external" href="./tflibs.model.html#tflibs.model.Model.add_model_args">tflib.model.Model.add_model_args()</a></li>
+<li>train_args: Train arguments. See: <a class="reference external" href="./tflibs.model.html#tflibs.model.Model.add_train_args">tflib.model.Model.add_train_args()</a></li>
+<li>eval_args: Evaluation arguments. See: <a class="reference external" href="./tflibs.model.html#tflibs.model.Model.add_eval_args">tflib.model.Model.add_eval_args()</a></li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parse_args</strong> (<em>argparse.Namespace</em>) – Parsed arguments.</li>
+<li><strong>unknown</strong> (<em>list</em>) – A list of unknown arguments. Exhaust these list.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A tuple of a dict of handled arguments and unknown arguments.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 

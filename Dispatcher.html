@@ -173,7 +173,23 @@
 <dl class="class">
 <dt id="tflibs.training.dispatcher.Dispatcher">
 <em class="property">class </em><code class="descclassname">tflibs.training.dispatcher.</code><code class="descname">Dispatcher</code><span class="sig-paren">(</span><em>model_cls</em>, <em>model_param</em>, <em>gpus</em>, <em>features</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/dispatcher.html#Dispatcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.dispatcher.Dispatcher" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
+<dd><p>A class for dispatching operations over multiple GPU devices and caculating tower loss</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model_cls</strong> (<em>class</em>) – Model class.</li>
+<li><strong>model_param</strong> (<em>dict</em>) – A dict of model parameters.</li>
+<li><strong>gpus</strong> (<em>list</em>) – A list of gpu ids.</li>
+<li><strong>features</strong> (<em>dict</em>) – A dict of <cite>tf.Tensor</cite> containing feature values.</li>
+<li><strong>labels</strong> (<em>tf.Tensor</em>) – A <cite>tf.Tensor</cite> of labels.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
 <dt id="tflibs.training.dispatcher.Dispatcher.chief">
 <code class="descname">chief</code><a class="headerlink" href="#tflibs.training.dispatcher.Dispatcher.chief" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -181,7 +197,27 @@
 <dl class="method">
 <dt id="tflibs.training.dispatcher.Dispatcher.minimize">
 <code class="descname">minimize</code><span class="sig-paren">(</span><em>optimizer</em>, <em>loss_fn</em>, <em>depends=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/dispatcher.html#Dispatcher.minimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.dispatcher.Dispatcher.minimize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets <cite>loss_fn</cite> which maps model object to loss tensor, caculates tower loss and minimize it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>optimizer</strong> (<em>tflibs.training.Optimizer</em>) – An optimizer.</li>
+<li><strong>loss_fn</strong> (<em>function</em>) – A function that maps model object to loss tensor.</li>
+<li><strong>depends</strong> (<em>tf.Operation</em>) – An operation that should be run before running an optimization.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Train op.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tf.Operation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="tflibs.training.dispatcher.Dispatcher.models">

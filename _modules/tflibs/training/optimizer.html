@@ -184,6 +184,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Optimizer.compute_grad"><a class="viewcode-back" href="../../../Optimizer.html#tflibs.training.optimizer.Optimizer.compute_grad">[docs]</a>    <span class="k">def</span> <span class="nf">compute_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes gradients of trainable variables with regard to a loss given.</span>
+
+<span class="sd">        :param tf.Tensor loss: A `tf.Tensor` of a loss.</span>
+<span class="sd">        :return: A list of tuples containing gradients and corresponding variables.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">compute_gradients</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Optimizer.apply_gradients"><a class="viewcode-back" href="../../../Optimizer.html#tflibs.training.optimizer.Optimizer.apply_gradients">[docs]</a>    <span class="k">def</span> <span class="nf">apply_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grads_and_vars</span><span class="p">):</span>
@@ -191,6 +198,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">grads_and_vars</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Optimizer.apply_tower_gradients"><a class="viewcode-back" href="../../../Optimizer.html#tflibs.training.optimizer.Optimizer.apply_tower_gradients">[docs]</a>    <span class="k">def</span> <span class="nf">apply_tower_gradients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tower_grads</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns average gradients.</span>
+
+<span class="sd">        :param list tower_grads: A list of tuples containing gradients and corresponding variables.</span>
+<span class="sd">        :return: Applying gradients operation</span>
+<span class="sd">        :rtype: tf.Operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">avg_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_average_gradients</span><span class="p">(</span><span class="n">tower_grads</span><span class="p">)</span>
         <span class="n">apply_grad_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">avg_grad</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">apply_grad_op</span></div>

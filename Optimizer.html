@@ -181,12 +181,38 @@
 <dl class="method">
 <dt id="tflibs.training.optimizer.Optimizer.apply_tower_gradients">
 <code class="descname">apply_tower_gradients</code><span class="sig-paren">(</span><em>tower_grads</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/optimizer.html#Optimizer.apply_tower_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.optimizer.Optimizer.apply_tower_gradients" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns average gradients.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tower_grads</strong> (<em>list</em>) – A list of tuples containing gradients and corresponding variables.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Applying gradients operation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tf.Operation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="tflibs.training.optimizer.Optimizer.compute_grad">
 <code class="descname">compute_grad</code><span class="sig-paren">(</span><em>loss</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/optimizer.html#Optimizer.compute_grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.optimizer.Optimizer.compute_grad" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Computes gradients of trainable variables with regard to a loss given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>loss</strong> (<em>tf.Tensor</em>) – A <cite>tf.Tensor</cite> of a loss.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of tuples containing gradients and corresponding variables.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="tflibs.training.optimizer.Optimizer.decay_learning_rate">

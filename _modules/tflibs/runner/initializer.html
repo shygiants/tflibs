@@ -172,6 +172,14 @@
         <span class="k">return</span> <span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset_pkg</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">export</span>
 
 <div class="viewcode-block" id="DatasetInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.DatasetInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds arguments</span>
+
+<span class="sd">        * --dataset-dir</span>
+<span class="sd">        * --dataset-name</span>
+
+<span class="sd">        :param argparse.ArgumentParser argparser: Argument parser used to add arguments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dataset-dir&#39;</span><span class="p">,</span>
                                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
@@ -182,6 +190,20 @@
                                <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_datasets</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="DatasetInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.DatasetInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles arguments.</span>
+
+<span class="sd">        Exhausts `--dataset-name` and `--dataset-dir`, and generates `dataset`.</span>
+
+<span class="sd">        Parses dataset-specific arguments.</span>
+
+<span class="sd">        See: `tflib.datasets.BaseDataset.add_arguments() &lt;./Dataset.html#tflibs.datasets.dataset.BaseDataset.add_arguments&gt;`_</span>
+
+<span class="sd">        :param argparse.Namespace parse_args: Parsed arguments.</span>
+<span class="sd">        :param list unknown: A list of unknown arguments. Exhaust these list.</span>
+<span class="sd">        :return: A tuple of a dict of handled arguments and unknown arguments.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dataset_name</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">dataset_name</span>
         <span class="n">dataset_dir</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">dataset_dir</span>
 
@@ -212,12 +234,29 @@
         <span class="k">return</span> <span class="n">list_modules</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_pkg</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ModelInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.ModelInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds arguments.</span>
+
+<span class="sd">        * --model-name</span>
+
+<span class="sd">        :param argparse.ArgumentParser argparser: Argument parser used to add arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--model-name&#39;</span><span class="p">,</span>
                                <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The name of the model to use.&#39;</span><span class="p">,</span>
                                <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_models</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="ModelInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.ModelInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles arguments.</span>
+
+<span class="sd">        Exhausts `--model-name` and generates `model_cls`.</span>
+
+<span class="sd">        :param argparse.Namespace parse_args: Parsed arguments.</span>
+<span class="sd">        :param list unknown: A list of unknown arguments. Exhaust these list.</span>
+<span class="sd">        :return: A tuple of a dict of handled arguments and unknown arguments.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">model_name</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">model_name</span>
 
         <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">model_name</span>
@@ -229,6 +268,23 @@
 
 <div class="viewcode-block" id="TrainInitializer"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.TrainInitializer">[docs]</a><span class="k">class</span> <span class="nc">TrainInitializer</span><span class="p">(</span><span class="n">ModelInitializer</span><span class="p">):</span>
 <div class="viewcode-block" id="TrainInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.TrainInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds arguments.</span>
+
+<span class="sd">        Adds arguments of `ModelInitializer`.</span>
+
+<span class="sd">        * --model-name</span>
+
+<span class="sd">        and</span>
+
+<span class="sd">        * --save-steps</span>
+<span class="sd">        * --keep-checkpoint-max</span>
+<span class="sd">        * --log-steps</span>
+<span class="sd">        * --random-seed</span>
+<span class="sd">        * --train-iters</span>
+
+<span class="sd">        :param argparse.ArgumentParser argparser: Argument parser used to add arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ModelInitializer</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">)</span>
 
         <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--save-steps&#39;</span><span class="p">,</span>
@@ -253,6 +309,20 @@
                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Maximum number of training iterations to perform.&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TrainInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.TrainInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles arguments.</span>
+
+<span class="sd">        Parses model-specific arguments.</span>
+
+<span class="sd">        * model_args: Common arguments. See: `tflib.model.Model.add_model_args() &lt;./tflibs.model.html#tflibs.model.Model.add_model_args&gt;`_</span>
+<span class="sd">        * train_args: Train arguments. See: `tflib.model.Model.add_train_args() &lt;./tflibs.model.html#tflibs.model.Model.add_train_args&gt;`_</span>
+<span class="sd">        * eval_args: Evaluation arguments. See: `tflib.model.Model.add_eval_args() &lt;./tflibs.model.html#tflibs.model.Model.add_eval_args&gt;`_</span>
+
+<span class="sd">        :param argparse.Namespace parse_args: Parsed arguments.</span>
+<span class="sd">        :param list unknown: A list of unknown arguments. Exhaust these list.</span>
+<span class="sd">        :return: A tuple of a dict of handled arguments and unknown arguments.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">handled_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">ModelInitializer</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">)</span>
 
         <span class="n">model_cls</span> <span class="o">=</span> <span class="n">handled_args</span><span class="p">[</span><span class="s1">&#39;model_cls&#39;</span><span class="p">]</span>
