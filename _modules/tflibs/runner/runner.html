@@ -161,24 +161,26 @@
 <span class="sd">    :param initializers: Initializers</span>
 <span class="sd">    :param default_job_dir: Default job directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="p">[],</span> <span class="n">default_job_dir</span><span class="o">=</span><span class="s1">&#39;/tmp/job-dir&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="p">[],</span> <span class="n">default_job_dir</span><span class="o">=</span><span class="s1">&#39;/tmp/job-dir&#39;</span><span class="p">,</span> <span class="n">no_job_dir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">initializers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_argparser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_no_job_dir</span> <span class="o">=</span> <span class="n">no_job_dir</span>
 
-        <span class="c1">#################</span>
-        <span class="c1"># Job Directory #</span>
-        <span class="c1">#################</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--job-dir&#39;</span><span class="p">,</span>
-                                    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-                                    <span class="n">default</span><span class="o">=</span><span class="n">default_job_dir</span><span class="p">,</span>
-                                    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                                        GCS or local dir for checkpoints, exports, and</span>
-<span class="s2">                                        summaries. Use an existing directory to load a</span>
-<span class="s2">                                        trained model, or a new directory to retrain&quot;&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--run-name&#39;</span><span class="p">,</span>
-                                    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-                                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The run name.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">no_job_dir</span><span class="p">:</span>
+            <span class="c1">#################</span>
+            <span class="c1"># Job Directory #</span>
+            <span class="c1">#################</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--job-dir&#39;</span><span class="p">,</span>
+                                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                                        <span class="n">default</span><span class="o">=</span><span class="n">default_job_dir</span><span class="p">,</span>
+                                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                                            GCS or local dir for checkpoints, exports, and</span>
+<span class="s2">                                            summaries. Use an existing directory to load a</span>
+<span class="s2">                                            trained model, or a new directory to retrain&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--run-name&#39;</span><span class="p">,</span>
+                                        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The run name.&#39;</span><span class="p">)</span>
         <span class="c1">##############</span>
         <span class="c1"># Run Config #</span>
         <span class="c1">##############</span>
@@ -211,15 +213,18 @@
             <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">parse_args</span><span class="o">.</span><span class="n">verbosity</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
         <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">verbosity</span>
 
-        <span class="c1"># Set job directory</span>
-        <span class="n">job_dir</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">job_dir</span>
-        <span class="n">run_name</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">run_name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_job_dir</span><span class="p">:</span>
+            <span class="c1"># Set job directory</span>
+            <span class="n">job_dir</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">job_dir</span>
+            <span class="n">run_name</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">run_name</span>
 
-        <span class="n">handled</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;job_dir&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">)</span>
-        <span class="p">}</span>
-        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">job_dir</span>
-        <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">run_name</span>
+            <span class="n">handled</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;job_dir&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">job_dir</span><span class="p">,</span> <span class="n">run_name</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">job_dir</span>
+            <span class="k">del</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">run_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">handled</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">handled</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">parse_args</span><span class="p">))</span>
         <span class="n">parse_args</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">handled</span><span class="p">)</span>
