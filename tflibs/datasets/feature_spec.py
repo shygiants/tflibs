@@ -1,5 +1,5 @@
 """
-    Feature Spec
+    See the guides: `Dataset <./Dataset.html>`_
 """
 
 import tensorflow as tf
@@ -10,18 +10,17 @@ from tflibs import image as tfimage
 
 
 class FeatureSpec:
-    """A class for specifying `Feature` proto.
+    """A class for specifying feature specs of a `tflibs.datasets.BaseDataset <./Dataset.html>`_.
     """
 
     @staticmethod
     def _int64_feature(values):
-        """Returns a TF-Feature of int64s.
+        """
+        Returns a TF-Feature of int64s.
 
-        Args:
-          values: A scalar or list of values.
-
-        Returns:
-          A TF-Feature.
+        :param int or list values: A int values.
+        :return: A TF-Feature proto.
+        :rtype: tf.train.Feature
         """
         if not isinstance(values, (tuple, list)):
             values = [values]
@@ -29,25 +28,23 @@ class FeatureSpec:
 
     @staticmethod
     def _bytes_feature(values):
-        """Returns a TF-Feature of bytes.
+        """
+        Returns a TF-Feature of bytes.
 
-        Args:
-            values: A string.
-
-        Returns:
-            A TF-Feature.
+        :param str values: A string.
+        :return: A TF-Feature proto.
+        :rtype: tf.train.Feature
         """
         return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
     @staticmethod
     def _float_feature(values):
-        """Returns a TF-Feature of floats.
+        """
+        Returns a TF-Feature of floats.
 
-        Args:
-            values: A scalar of list of values.
-
-        Returns:
-            A TF-Feature.
+        :param float or list values: A scalar of list of values.
+        :return: A TF-Feature proto.
+        :rtype: tf.train.Feature
         """
         if not isinstance(values, (tuple, list)):
             values = [values]
@@ -62,9 +59,22 @@ class FeatureSpec:
 
     @property
     def feature_proto_spec(self):
+        """
+        A property for specifying inner encoding spec of the feature
+
+        :return: The dict containing shape and dtype info
+        :rtype: dict
+        """
         raise NotImplementedError
 
     def feature_proto(self, value_dict):
+        """
+        Returns a dict of `tf.train.Feature` proto corresponding to `feature_proto_spec`
+
+        :param dict value_dict: A dict containing values of `feature_proto_spec`
+        :return: A dict of `tf.train.Feature`
+        :rtype: dict
+        """
         def map_fn(k, v):
             dtype = v['dtype']
             value = value_dict[k]
@@ -82,6 +92,14 @@ class FeatureSpec:
         return map_dict(map_fn, self.feature_proto_spec)
 
     def parse(self, parent_key, record):
+        """
+        Parse TF-record and returns dict of `tf.Tensor`
+
+        :param str parent_key: The key of the feature
+        :param tf.Tensor record: String tensor of TF-record
+        :return: A dict of tensors as specified at `feature_proto_spec`
+        :rtype: dict
+        """
         def parse(k, v):
             return '{}/{}'.format(parent_key, k), tf.FixedLenFeature(v['shape'], v['dtype'])
 
@@ -97,6 +115,12 @@ class IDSpec(FeatureSpec):
 
     @property
     def feature_proto_spec(self):
+        """
+        A property for specifying inner encoding spec of the feature
+
+        :return: The dict containing shape and dtype info
+        :rtype: dict
+        """
         return {
             '_id': {
                 'shape': (),
@@ -105,6 +129,14 @@ class IDSpec(FeatureSpec):
         }
 
     def parse(self, parent_key, record):
+        """
+        Parse TF-record and returns `tf.Tensor`
+
+        :param str parent_key: The key of the feature
+        :param tf.Tensor record: String tensor of TF-record
+        :return: A scalar tensor containing an id
+        :rtype: tf.Tensor
+        """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
         return parsed['{}/_id'.format(parent_key)]
@@ -116,12 +148,23 @@ class IDSpec(FeatureSpec):
 
 
 class ImageSpec(FeatureSpec):
+    """
+    A class for specifying image spec
+
+    :param list|tuple image_size: The sizes of images
+    """
     def __init__(self, image_size):
         image_size = list(image_size)
         FeatureSpec.__init__(self, image_size + [3])
 
     @property
     def feature_proto_spec(self):
+        """
+        A property for specifying inner encoding spec of the feature
+
+        :return: The dict containing shape and dtype info
+        :rtype: dict
+        """
         return {
             'encoded': {
                 'shape': (),
@@ -130,6 +173,14 @@ class ImageSpec(FeatureSpec):
         }
 
     def parse(self, parent_key, record):
+        """
+        Parse TF-record and returns `tf.Tensor`
+
+        :param str parent_key: The key of the feature
+        :param tf.Tensor record: String tensor of TF-record
+        :return: A 3-D tensor containing an image
+        :rtype: tf.Tensor
+        """
         parsed = FeatureSpec.parse(self, parent_key, record)
         decoded = tf.image.decode_image(parsed['{}/{}'.format(parent_key, 'encoded')], channels=3)
         decoded = tf.reshape(decoded, self.shape)
@@ -158,12 +209,24 @@ class ImageSpec(FeatureSpec):
 
 
 class LabelSpec(FeatureSpec):
+    """
+    A class for specifying one-hot label spec
+
+    :param int depth: The number of labels
+    :param list class_names: A list of `str` which describes each labels
+    """
     def __init__(self, depth, class_names=None):
         FeatureSpec.__init__(self, [depth])
         self._class_names = class_names
 
     @property
     def feature_proto_spec(self):
+        """
+        A property for specifying inner encoding spec of the feature
+
+        :return: The dict containing shape and dtype info
+        :rtype: dict
+        """
         return {
             'index': {
                 'shape': (),
@@ -172,6 +235,14 @@ class LabelSpec(FeatureSpec):
         }
 
     def parse(self, parent_key, record):
+        """
+        Parse TF-record and returns `tf.Tensor`
+
+        :param str parent_key: The key of the feature
+        :param tf.Tensor record: String tensor of TF-record
+        :return: An 1-D tensor containing label
+        :rtype: tf.Tensor
+        """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
         return tf.one_hot(parsed['{}/{}'.format(parent_key, 'index')], self.shape[0])
@@ -183,20 +254,45 @@ class LabelSpec(FeatureSpec):
             'index': index
         }
 
+    def create_with_label(self, label):
+        # TODO: Assert bad labels don't exist
+        return {
+            'index': self._class_names.index(label)
+        }
+
     @classmethod
     def from_class_names(cls, class_names):
+        """
+        Create `LabelSpec` object from a list of names specifying each classes
+
+        :param list class_names: A list of names specifying each classes
+        :return: `LabelSpec` object
+        :rtype: LabelSpec
+        """
         obj = cls(len(class_names), class_names)
 
         return obj
 
 
 class MultiLabelSpec(FeatureSpec):
+    """
+    A class for specifying multi-label spec
+
+    :param int depth: The number of labels
+    :param list class_names: A list of `str` which describes each labels
+    """
     def __init__(self, depth, class_names=None):
         FeatureSpec.__init__(self, [depth])
         self._class_names = class_names
 
     @property
     def feature_proto_spec(self):
+        """
+        A property for specifying inner encoding spec of the feature
+
+        :return: The dict containing shape and dtype info
+        :rtype: dict
+        """
         return {
             'tensor': {
                 'shape': self.shape,
@@ -206,11 +302,26 @@ class MultiLabelSpec(FeatureSpec):
 
     @classmethod
     def from_class_names(cls, class_names):
+        """
+        Create `MultiLabelSpec` object from a list of names specifying each classes
+
+        :param list class_names: A list of names specifying each classes
+        :return: `MultiLabelSpec` object
+        :rtype: MultiLabelSpec
+        """
         obj = cls(len(class_names), class_names)
 
         return obj
 
     def parse(self, parent_key, record):
+        """
+        Parse TF-record and returns `tf.Tensor`
+
+        :param str parent_key: The key of the feature
+        :param tf.Tensor record: String tensor of TF-record
+        :return: A 1-D tensor containing label
+        :rtype: tf.Tensor
+        """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
         return parsed['{}/{}'.format(parent_key, 'tensor')]

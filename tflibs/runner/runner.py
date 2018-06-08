@@ -55,8 +55,8 @@ class Runner:
     def run(self, main):
         """
         Run
-        :param main: main function to run
-        :return:
+
+        :param function main: main function to run
         """
         parse_args, unknown = self.argparser.parse_known_args()
 

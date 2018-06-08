@@ -1,5 +1,76 @@
 """
-    Dataset
+    When defining a dataset, a class that inherits `tflibs.datasets.BaseDataset` should be defined.
+
+    The following is an example of a definition.
+
+    >>> import os
+    >>> from tflibs.datasets import ImageSpec, LabelSpec
+    >>>
+    >>> class CatDogDataset(BaseDataset):
+    >>>     def __init__(self, dataset_dir, image_size):
+    >>>         self._image_size = image_size
+    >>>         BaseDataset.__init__(self, os.path.join(dataset_dir, 'cat_dog'))
+    >>>
+    >>>     @property
+    >>>     def tfrecord_filename(self):
+    >>>         return 'cat_dog.tfrecord'
+    >>>
+    >>>     def _init_feature_specs(self):
+    >>>         return {
+    >>>             'image': ImageSpec([self._image_size] * 2),
+    >>>             'label': LabelSpec(3, class_names=['Cat', 'Dog', 'Cookie'])
+    >>>         }
+    >>>
+    >>>     @classmethod
+    >>>     def add_arguments(cls, parser):
+    >>>         parser.add_argument('--image-size',
+    >>>                             type=int,
+    >>>                             default=128,
+    >>>                             help='The size of output image.')
+
+    When writing TF-record files, create dataset object and call `write()`.
+
+    >>> dataset = CatDogDataset('/tmp/dataset', 64)
+    >>>
+    >>> images = ['/cat/abc.jpg', '/dog/def.jpg', '/cookie/ghi.jpg']
+    >>> labels = ['Cat', 'Dog', 'Cookie']
+    >>>
+    >>> def process_fn((image_path, label_str), feature_specs):
+    >>>     id_string = os.path.splitext(os.path.basename(image_path))[0]
+    >>>
+    >>>     def build_example(_id, image, label):
+    >>>         return {
+    >>>             '_id': _id.create_with_string(id_string),
+    >>>             'image': image.create_with_path(image_path),
+    >>>             'label': label.create_with_label(label_str),
+    >>>         }
+    >>>
+    >>>     return build_example(**feature_specs)
+    >>>
+    >>> dataset.write(zip(images, labels), process_fn)
+
+    When reading TF-record files, create dataset object and call `read()`.
+
+    >>> dataset = CatDogDataset('/tmp/dataset', 64)
+    >>>
+    >>> # Returns a `tf.data.Dataset`
+    >>> # {
+    >>> #   '_id': {
+    >>> #       'dtype': tf.string,
+    >>> #       'shape': (),
+    >>> #   },
+    >>> #   'image': {
+    >>> #       'dtype': tf.uint8,
+    >>> #       'shape': [64, 64, 3],
+    >>> #   },
+    >>> #   'label': {
+    >>> #       'dtype': tf.int64,
+    >>> #       'shape': [3],
+    >>> #   }
+    >>> # }
+    >>> tfdataset = dataset.read()
+
+
 """
 
 import os
@@ -36,6 +107,14 @@ class BaseDataset:
 
     @property
     def tfrecord_filename(self):
+        """
+        It should return the name of TF-record file.
+
+        This should be implemented when defining a dataset.
+
+        :return: TF-record filename
+        :rtype: str
+        """
         raise NotImplementedError
 
     def _init_feature_specs(self):
@@ -44,7 +123,9 @@ class BaseDataset:
     @classmethod
     def add_arguments(cls, parser):
         """
-        Adds arguments
+        Adds arguments.
+
+        Called when `tflibs.runner.DatasetInitializer` creates a dataset object.
 
         :param argparse.ArgumentParser parser: Argument parser used to add arguments
         """
