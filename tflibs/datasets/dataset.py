@@ -159,7 +159,7 @@ class BaseDataset:
 
                 get_writer = lambda i: test_writer if i < test_size else train_writer
             else:
-                writer = tf.python_io.TFRecordWriter(os.path.join(self._dataset_dir, self.tfrecord_filename))
+                writer = tf.python_io.TFRecordWriter(os.path.join(self._dataset_dir, tfrecord_filepattern))
                 get_writer = lambda _: writer
 
             for i, elem in tqdm(enumerate(coll), total=len(coll), position=thread_idx):
