@@ -182,7 +182,7 @@ class ImageSpec(FeatureSpec):
         :rtype: tf.Tensor
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
-        decoded = tf.image.decode_image(parsed['{}/{}'.format(parent_key, 'encoded')], channels=3)
+        decoded = tf.image.decode_image(parsed['{}/{}'.format(parent_key, 'encoded')], channels=self.shape[-1])
         decoded = tf.reshape(decoded, self.shape)
 
         return decoded
