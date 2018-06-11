@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.utils.summary &mdash; tflibs 0.1.5 documentation</title>
+  <title>tflibs.utils.summary &mdash; tflibs 0.2.0 documentation</title>
   
 
   
@@ -144,6 +144,8 @@
   <h1>Source code for tflibs.utils.summary</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Summary &quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
 
 <div class="viewcode-block" id="strip_illegal_summary_name"><a class="viewcode-back" href="../../../tflibs.utils.html#tflibs.utils.summary.strip_illegal_summary_name">[docs]</a><span class="k">def</span> <span class="nf">strip_illegal_summary_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -152,6 +154,12 @@
 <span class="sd">    :return: Stripped name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;:0&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="histogram_trainable_vars"><a class="viewcode-back" href="../../../tflibs.utils.html#tflibs.utils.summary.histogram_trainable_vars">[docs]</a><span class="k">def</span> <span class="nf">histogram_trainable_vars</span><span class="p">():</span>
+    <span class="n">trainable_vars</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">trainable_vars</span><span class="p">:</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">strip_illegal_summary_name</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">var</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Trainable_Variables&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -186,7 +194,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.1.5',
+            VERSION:'0.2.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

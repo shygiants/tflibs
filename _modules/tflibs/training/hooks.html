@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.training.hooks &mdash; tflibs 0.1.5 documentation</title>
+  <title>tflibs.training.hooks &mdash; tflibs 0.2.0 documentation</title>
   
 
   
@@ -199,7 +199,7 @@
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SessionRunArgs</span><span class="p">({</span>
             <span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_op</span><span class="p">,</span>
             <span class="s1">&#39;global_step&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">get_or_create_global_step</span><span class="p">()</span>
-        <span class="p">})</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finished</span> <span class="k">else</span> <span class="kc">None</span></div>
+        <span class="p">})</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finished</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="EvalSummaryHook.after_run"><a class="viewcode-back" href="../../../Hooks.html#tflibs.training.hooks.EvalSummaryHook.after_run">[docs]</a>    <span class="k">def</span> <span class="nf">after_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">run_context</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
@@ -274,7 +274,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.1.5',
+            VERSION:'0.2.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

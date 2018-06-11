@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.runner.initializer &mdash; tflibs 0.1.5 documentation</title>
+  <title>tflibs.runner.initializer &mdash; tflibs 0.2.0 documentation</title>
   
 
   
@@ -185,6 +185,7 @@
                                <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The directory where the dataset files are stored.&#39;</span><span class="p">)</span>
         <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dataset-name&#39;</span><span class="p">,</span>
+                               <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The name of a dataset.&#39;</span><span class="p">,</span>
                                <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_datasets</span><span class="p">())</span></div>
@@ -216,7 +217,7 @@
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
         <span class="n">dataset_cls</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
         <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
-        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">parse_args</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">parse_args</span><span class="p">,</span> <span class="s1">&#39;Dataset arguments&#39;</span><span class="p">)</span>
 
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset_cls</span><span class="p">(</span><span class="n">dataset_dir</span><span class="p">,</span> <span class="o">**</span><span class="nb">vars</span><span class="p">(</span><span class="n">parse_args</span><span class="p">))</span>
 
@@ -243,6 +244,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">argparser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--model-name&#39;</span><span class="p">,</span>
                                <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                               <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The name of the model to use.&#39;</span><span class="p">,</span>
                                <span class="n">choices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_models</span><span class="p">())</span></div>
 
@@ -331,19 +333,19 @@
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
         <span class="n">model_cls</span><span class="o">.</span><span class="n">add_model_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
         <span class="n">model_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
-        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">model_args</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">model_args</span><span class="p">,</span> <span class="s1">&#39;Model arguments&#39;</span><span class="p">)</span>
 
         <span class="c1"># Parse model-specific train arguments</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
         <span class="n">model_cls</span><span class="o">.</span><span class="n">add_train_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
         <span class="n">train_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
-        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">train_args</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">train_args</span><span class="p">,</span> <span class="s1">&#39;Train arguments&#39;</span><span class="p">)</span>
 
         <span class="c1"># Parse model-specific eval arguments</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
         <span class="n">model_cls</span><span class="o">.</span><span class="n">add_eval_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
         <span class="n">eval_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
-        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">eval_args</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">eval_args</span><span class="p">,</span> <span class="s1">&#39;Eval arguments&#39;</span><span class="p">)</span>
 
         <span class="n">train_args</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">train_args</span><span class="p">)</span>
         <span class="n">train_args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;train_iters&#39;</span><span class="p">:</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">train_iters</span><span class="p">})</span>
@@ -355,7 +357,7 @@
         <span class="p">}</span>
 
         <span class="n">save_steps</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">save_steps</span>
-        <span class="n">log_steps</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">log_steps</span><span class="p">,</span>
+        <span class="n">log_steps</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">log_steps</span>
         <span class="n">keep_checkpoint_max</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">keep_checkpoint_max</span>
         <span class="n">random_seed</span> <span class="o">=</span> <span class="n">parse_args</span><span class="o">.</span><span class="n">random_seed</span>
 
@@ -415,7 +417,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.1.5',
+            VERSION:'0.2.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
