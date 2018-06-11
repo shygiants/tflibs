@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.training.dispatcher &mdash; tflibs 0.2.0 documentation</title>
+  <title>tflibs.training.dispatcher &mdash; tflibs 0.2.1 documentation</title>
   
 
   
@@ -174,7 +174,7 @@
                                                                      <span class="o">**</span><span class="n">model_param</span><span class="p">),</span>
                            <span class="nb">zip</span><span class="p">(</span><span class="n">gpus</span><span class="p">,</span> <span class="n">split_features</span><span class="p">,</span> <span class="n">split_labels</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Dispatcher.minimize"><a class="viewcode-back" href="../../../Dispatcher.html#tflibs.training.dispatcher.Dispatcher.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">depends</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Dispatcher.minimize"><a class="viewcode-back" href="../../../Dispatcher.html#tflibs.training.dispatcher.Dispatcher.minimize">[docs]</a>    <span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">depends</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets `loss_fn` which maps model object to loss tensor, caculates tower loss and minimize it.</span>
 
@@ -193,7 +193,7 @@
                     <span class="k">return</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">compute_grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 
             <span class="n">tower_grads</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">compute_grad</span><span class="p">,</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">))</span>
-            <span class="n">apply_grad_op</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_tower_gradients</span><span class="p">(</span><span class="n">tower_grads</span><span class="p">)</span>
+            <span class="n">apply_grad_op</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_tower_gradients</span><span class="p">(</span><span class="n">tower_grads</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">apply_grad_op</span></div>
 
@@ -238,7 +238,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.2.0',
+            VERSION:'0.2.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

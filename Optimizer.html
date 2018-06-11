@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Optimizer &mdash; tflibs 0.2.0 documentation</title>
+  <title>Optimizer &mdash; tflibs 0.2.1 documentation</title>
   
 
   
@@ -180,7 +180,7 @@
 
 <dl class="method">
 <dt id="tflibs.training.optimizer.Optimizer.apply_tower_gradients">
-<code class="descname">apply_tower_gradients</code><span class="sig-paren">(</span><em>tower_grads</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/optimizer.html#Optimizer.apply_tower_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.optimizer.Optimizer.apply_tower_gradients" title="Permalink to this definition">¶</a></dt>
+<code class="descname">apply_tower_gradients</code><span class="sig-paren">(</span><em>tower_grads</em>, <em>global_step=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/optimizer.html#Optimizer.apply_tower_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.optimizer.Optimizer.apply_tower_gradients" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns average gradients.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -221,7 +221,7 @@
 
 <dl class="method">
 <dt id="tflibs.training.optimizer.Optimizer.train_op">
-<code class="descname">train_op</code><span class="sig-paren">(</span><em>loss</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/optimizer.html#Optimizer.train_op"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.optimizer.Optimizer.train_op" title="Permalink to this definition">¶</a></dt>
+<code class="descname">train_op</code><span class="sig-paren">(</span><em>loss</em>, <em>global_step=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tflibs/training/optimizer.html#Optimizer.train_op"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tflibs.training.optimizer.Optimizer.train_op" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -275,7 +275,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.2.0',
+            VERSION:'0.2.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
