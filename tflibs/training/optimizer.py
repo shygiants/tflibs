@@ -33,9 +33,9 @@ class Optimizer:
 
         return self._var_list
 
-    def train_op(self, loss):
+    def train_op(self, loss, global_step=None):
         grads = self.compute_grad(loss)
-        return self.apply_gradients(grads)
+        return self.apply_gradients(grads, global_step=global_step)
 
     def compute_grad(self, loss):
         """
@@ -51,7 +51,7 @@ class Optimizer:
         tf.contrib.training.add_gradients_summaries(grads_and_vars)
         return self.optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
-    def apply_tower_gradients(self, tower_grads):
+    def apply_tower_gradients(self, tower_grads, global_step=None):
         """
         Returns average gradients.
 
@@ -60,7 +60,7 @@ class Optimizer:
         :rtype: tf.Operation
         """
         avg_grad = self._average_gradients(tower_grads)
-        apply_grad_op = self.apply_gradients(avg_grad)
+        apply_grad_op = self.apply_gradients(avg_grad, global_step=global_step)
         return apply_grad_op
 
     @staticmethod

@@ -11,12 +11,31 @@ class Model:
 
     @classmethod
     def add_model_args(cls, argparser, parse_args):
-        raise NotImplementedError
+        pass
 
     @classmethod
     def add_train_args(cls, argparser, parse_args):
-        raise NotImplementedError
+        pass
 
     @classmethod
     def add_eval_args(cls, argparser, parse_args):
-        raise NotImplementedError
+        pass
+
+
+class Network:
+    def __init__(self, is_chief, features, labels):
+        self._is_chief = is_chief
+        self._features = features
+        self._labels = labels
+
+    @property
+    def is_chief(self):
+        return self._is_chief
+
+    @property
+    def features(self):
+        return self._features
+
+    @property
+    def labels(self):
+        return self._labels

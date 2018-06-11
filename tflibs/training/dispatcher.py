@@ -30,7 +30,7 @@ class Dispatcher:
                                                                      **model_param),
                            zip(gpus, split_features, split_labels))
 
-    def minimize(self, optimizer, loss_fn, depends=None):
+    def minimize(self, optimizer, loss_fn, depends=None, global_step=None):
         """
         Gets `loss_fn` which maps model object to loss tensor, caculates tower loss and minimize it.
 
@@ -49,7 +49,7 @@ class Dispatcher:
                     return optimizer.compute_grad(loss)
 
             tower_grads = map(compute_grad, enumerate(self._models))
-            apply_grad_op = optimizer.apply_tower_gradients(tower_grads)
+            apply_grad_op = optimizer.apply_tower_gradients(tower_grads, global_step=global_step)
 
             return apply_grad_op
 
