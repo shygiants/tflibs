@@ -41,6 +41,7 @@ class DatasetInitializer(BaseInitializer):
                                type=str,
                                help='The directory where the dataset files are stored.')
         argparser.add_argument('--dataset-name',
+                               required=True,
                                type=str,
                                help='The name of a dataset.',
                                choices=self._list_datasets())
@@ -72,7 +73,7 @@ class DatasetInitializer(BaseInitializer):
         parser = argparse.ArgumentParser()
         dataset_cls.add_arguments(parser)
         parse_args, unknown = parser.parse_known_args(unknown)
-        log_parse_args(parse_args)
+        log_parse_args(parse_args, 'Dataset arguments')
 
         dataset = dataset_cls(dataset_dir, **vars(parse_args))
 
@@ -99,6 +100,7 @@ class ModelInitializer(BaseInitializer):
         """
         argparser.add_argument('--model-name',
                                type=str,
+                               required=True,
                                help='The name of the model to use.',
                                choices=self._list_models())
 
@@ -187,19 +189,19 @@ class TrainInitializer(ModelInitializer):
         parser = argparse.ArgumentParser()
         model_cls.add_model_args(parser, parse_args)
         model_args, unknown = parser.parse_known_args(unknown)
-        log_parse_args(model_args)
+        log_parse_args(model_args, 'Model arguments')
 
         # Parse model-specific train arguments
         parser = argparse.ArgumentParser()
         model_cls.add_train_args(parser, parse_args)
         train_args, unknown = parser.parse_known_args(unknown)
-        log_parse_args(train_args)
+        log_parse_args(train_args, 'Train arguments')
 
         # Parse model-specific eval arguments
         parser = argparse.ArgumentParser()
         model_cls.add_eval_args(parser, parse_args)
         eval_args, unknown = parser.parse_known_args(unknown)
-        log_parse_args(eval_args)
+        log_parse_args(eval_args, 'Eval arguments')
 
         train_args = vars(train_args)
         train_args.update({'train_iters': parse_args.train_iters})
@@ -211,7 +213,7 @@ class TrainInitializer(ModelInitializer):
         }
 
         save_steps = parse_args.save_steps
-        log_steps = parse_args.log_steps,
+        log_steps = parse_args.log_steps
         keep_checkpoint_max = parse_args.keep_checkpoint_max
         random_seed = parse_args.random_seed
 

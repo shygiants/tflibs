@@ -69,6 +69,8 @@ class Runner:
             tf.logging.__dict__[parse_args.verbosity] / 10)
         del parse_args.verbosity
 
+        log_parse_args(parse_args, 'Runner arguments')
+
         if not self._no_job_dir:
             # Set job directory
             job_dir = parse_args.job_dir
@@ -98,7 +100,7 @@ class Runner:
         if unknown:
             raise ValueError('Unknown arguments: {}'.format(unknown))
 
-        log_parse_args(handled_args)
+        log_parse_args(handled_args, 'Final arguments')
 
         main(**vars(handled_args))
 

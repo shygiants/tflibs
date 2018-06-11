@@ -27,11 +27,9 @@ class Optimizer:
         if self._var_list is None:
             self._var_list = tf.trainable_variables('.*' + self.var_scope)
 
-            # TODO: Move this line
             tf.logging.info('Trainable variables in %s:', self.var_scope)
             for var in self._var_list:
                 tf.logging.info('%s', var)
-                tf.summary.histogram(strip_illegal_summary_name(var.name), var, family='Trainable_Variables')
 
         return self._var_list
 
@@ -49,9 +47,9 @@ class Optimizer:
         """
         return self.optimizer.compute_gradients(loss, var_list=self.var_list)
 
-    def apply_gradients(self, grads_and_vars):
+    def apply_gradients(self, grads_and_vars, global_step=None):
         tf.contrib.training.add_gradients_summaries(grads_and_vars)
-        return self.optimizer.apply_gradients(grads_and_vars)
+        return self.optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
     def apply_tower_gradients(self, tower_grads):
         """

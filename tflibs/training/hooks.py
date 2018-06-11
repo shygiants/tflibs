@@ -55,7 +55,7 @@ class EvalSummaryHook(tf.train.SessionRunHook):
         return tf.train.SessionRunArgs({
             'summary': self._summary_op,
             'global_step': tf.train.get_or_create_global_step()
-        }) if not self._finished else None
+        }) if not self._finished and self._summary_op is not None else None
 
     def after_run(self,
                   run_context,  # pylint: disable=unused-argument
