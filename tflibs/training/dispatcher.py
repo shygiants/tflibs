@@ -30,9 +30,9 @@ class Dispatcher:
             split_labels = tf.split(labels, num_gpus)
             args.append(split_labels)
 
-        self._models = map(lambda *args: model_cls(is_chief=args[0] == 0,
-                                                   *(args[1:]),
-                                                   **model_param),
+        self._models = map(lambda args: model_cls(args[0] == 0,
+                                                  *(args[1:]),
+                                                  **model_param),
                            zip(*args))
 
     def minimize(self, optimizer, loss_fn, depends=None, global_step=None):
