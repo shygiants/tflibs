@@ -23,7 +23,7 @@ class Model:
 
 
 class Network:
-    def __init__(self, is_chief, features, labels):
+    def __init__(self, is_chief, features, labels=None):
         self._is_chief = is_chief
         self._features = features
         self._labels = labels

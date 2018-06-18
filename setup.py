@@ -9,7 +9,7 @@ setup(
         'opencv-python',
         'requests',
     ],
-    version='0.2.2',
+    version='0.2.3',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',

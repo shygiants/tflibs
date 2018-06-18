@@ -17,18 +17,23 @@ class Dispatcher:
     :param dict features: A dict of `tf.Tensor` containing feature values.
     :param tf.Tensor labels: A `tf.Tensor` of labels.
     """
-    def __init__(self, model_cls, model_param, gpus, features, labels):
+
+    def __init__(self, model_cls, model_param, gpus, features, labels=None):
         num_gpus = len(gpus)
 
         # Split inputs
         split_feature_dict = map_dict(lambda k, v: (k, tf.split(v, num_gpus)), features)
         split_features = map(lambda gpu: map_dict(lambda k, v: (k, v[gpu]), split_feature_dict), gpus)
-        split_labels = tf.split(labels, num_gpus)
-        self._models = map(lambda (gpu, features, labels): model_cls(is_chief=gpu == 0,
-                                                                     features=features,
-                                                                     labels=labels,
-                                                                     **model_param),
-                           zip(gpus, split_features, split_labels))
+
+        args = [gpus, split_features]
+        if labels is not None:
+            split_labels = tf.split(labels, num_gpus)
+            args.append(split_labels)
+
+        self._models = map(lambda *args: model_cls(is_chief=args[0] == 0,
+                                                   *(args[1:]),
+                                                   **model_param),
+                           zip(*args))
 
     def minimize(self, optimizer, loss_fn, depends=None, global_step=None):
         """
