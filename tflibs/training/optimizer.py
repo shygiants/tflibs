@@ -19,6 +19,8 @@ class Optimizer:
         else:
             raise ValueError('`decay_policy` should be `none`, `dying` or `step`.')
 
+        tf.summary.scalar(var_scope, self._learning_rate, family='Learning_Rates')
+
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate, beta1=beta1, beta2=beta2)
         self.var_scope = var_scope
 
