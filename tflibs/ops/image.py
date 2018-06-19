@@ -27,3 +27,16 @@ def decode_image(encoded_image, image_shape, image_format=None, conditional=Fals
     image = tf.reshape(image, image_shape)
 
     return image
+
+
+def normalize_images(images):
+    with tf.name_scope('normalize_images', values=[images]):
+        images -= tf.reduce_min(images)
+        return images / tf.reduce_max(images)
+
+
+def concat_images(*list_images):
+    with tf.name_scope('concat_images', values=list_images):
+        list_images = map(normalize_images, list_images)
+
+        return tf.concat(list_images, 2)

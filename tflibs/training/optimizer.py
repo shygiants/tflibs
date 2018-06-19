@@ -9,13 +9,15 @@ from tflibs.utils import strip_illegal_summary_name
 
 # TODO: Universal optimizer
 class Optimizer:
-    def __init__(self, learning_rate, var_scope, beta1, beta2, train_iters=None, decay_iters=None, decay_steps=None):
-        if train_iters is None and decay_iters is None and decay_steps is None:
+    def __init__(self, learning_rate, var_scope, beta1, beta2, decay_policy='none', decay_params=None):
+        if decay_policy == 'none':
             self._learning_rate = learning_rate
-        elif train_iters is not None and decay_iters is not None and decay_steps is not None:
-            self._learning_rate = self.decay_learning_rate(learning_rate, train_iters, decay_iters, decay_steps)
+        elif decay_policy == 'dying':
+            self._learning_rate = self.dying_decay(learning_rate, **decay_params)
+        elif decay_policy == 'step':
+            self._learning_rate = self.step_decay(learning_rate, **decay_params)
         else:
-            raise ValueError('`train_iters`, `decay_iters` and `decay_steps` should be provided.')
+            raise ValueError('`decay_policy` should be `none`, `dying` or `step`.')
 
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate, beta1=beta1, beta2=beta2)
         self.var_scope = var_scope
@@ -87,7 +89,7 @@ class Optimizer:
         return map(reduce_gradients, filter(filter_no_gradients, zip(*tower_grads)))
 
     @staticmethod
-    def decay_learning_rate(starter_learning_rate, train_iters, decay_iters, decay_steps):
+    def dying_decay(starter_learning_rate, train_iters, decay_iters, decay_steps):
         global_step = tf.train.get_or_create_global_step()
 
         start_decay = train_iters - decay_iters
@@ -100,5 +102,18 @@ class Optimizer:
                                          decay_rate),
             y=starter_learning_rate
         )
+
+        return learning_rate
+
+    @staticmethod
+    def step_decay(starter_learning_rate, train_iters, decay_steps, decay_rate):
+        global_step = tf.train.get_or_create_global_step()
+
+        num_decay = train_iters / decay_steps
+
+        boundaries = [decay_steps * (i + 1) for i in range(num_decay)]
+        values = [starter_learning_rate * decay_rate ** i for i in range(num_decay + 1)]
+
+        learning_rate = tf.train.piecewise_constant(global_step, boundaries, values)
 
         return learning_rate
