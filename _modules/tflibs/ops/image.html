@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.ops.image &mdash; tflibs 0.2.4 documentation</title>
+  <title>tflibs.ops.image &mdash; tflibs 0.3.0 documentation</title>
   
 
   
@@ -171,6 +171,19 @@
     <span class="n">image</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">image</span></div>
+
+
+<div class="viewcode-block" id="normalize_images"><a class="viewcode-back" href="../../../tflibs.ops.html#tflibs.ops.image.normalize_images">[docs]</a><span class="k">def</span> <span class="nf">normalize_images</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;normalize_images&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="n">images</span><span class="p">]):</span>
+        <span class="n">images</span> <span class="o">-=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_min</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">images</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">images</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="concat_images"><a class="viewcode-back" href="../../../tflibs.ops.html#tflibs.ops.image.concat_images">[docs]</a><span class="k">def</span> <span class="nf">concat_images</span><span class="p">(</span><span class="o">*</span><span class="n">list_images</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;concat_images&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">list_images</span><span class="p">):</span>
+        <span class="n">list_images</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">normalize_images</span><span class="p">,</span> <span class="n">list_images</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -205,7 +218,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.2.4',
+            VERSION:'0.3.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

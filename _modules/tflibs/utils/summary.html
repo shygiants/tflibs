@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.utils.summary &mdash; tflibs 0.2.4 documentation</title>
+  <title>tflibs.utils.summary &mdash; tflibs 0.3.0 documentation</title>
   
 
   
@@ -160,6 +160,11 @@
     <span class="n">trainable_vars</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">trainable_vars</span><span class="p">:</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">strip_illegal_summary_name</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">var</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Trainable_Variables&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="image_summary"><a class="viewcode-back" href="../../../tflibs.utils.html#tflibs.utils.summary.image_summary">[docs]</a><span class="k">def</span> <span class="nf">image_summary</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">image</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">max_outputs</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Images&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -194,7 +199,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.2.4',
+            VERSION:'0.3.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
