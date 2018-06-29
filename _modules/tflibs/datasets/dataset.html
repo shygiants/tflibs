@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.datasets.dataset &mdash; tflibs 0.3.1 documentation</title>
+  <title>tflibs.datasets.dataset &mdash; tflibs 0.3.2 documentation</title>
   
 
   
@@ -315,16 +315,20 @@
                 <span class="c1"># Write</span>
                 <span class="n">writer</span> <span class="o">=</span> <span class="n">get_writer</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
-                <span class="c1"># Build feature proto</span>
-                <span class="n">nested_feature</span> <span class="o">=</span> <span class="n">map_dict</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">feature_proto</span><span class="p">(</span><span class="n">processed</span><span class="p">[</span><span class="n">k</span><span class="p">])),</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_specs</span><span class="p">)</span>
-                <span class="c1"># Flatten nested dict</span>
-                <span class="n">feature</span> <span class="o">=</span> <span class="n">flatten_nested_dict</span><span class="p">(</span><span class="n">nested_feature</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">processed</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">processed</span> <span class="o">=</span> <span class="p">[</span><span class="n">processed</span><span class="p">]</span>
 
-                <span class="c1"># Build example proto</span>
-                <span class="n">example</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Example</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Features</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="n">feature</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">processed_e</span> <span class="ow">in</span> <span class="n">processed</span><span class="p">:</span>
+                    <span class="c1"># Build feature proto</span>
+                    <span class="n">nested_feature</span> <span class="o">=</span> <span class="n">map_dict</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">feature_proto</span><span class="p">(</span><span class="n">processed_e</span><span class="p">[</span><span class="n">k</span><span class="p">])),</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_specs</span><span class="p">)</span>
+                    <span class="c1"># Flatten nested dict</span>
+                    <span class="n">feature</span> <span class="o">=</span> <span class="n">flatten_nested_dict</span><span class="p">(</span><span class="n">nested_feature</span><span class="p">)</span>
 
-                <span class="c1"># Write example proto on tfrecord file</span>
-                <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">example</span><span class="o">.</span><span class="n">SerializeToString</span><span class="p">())</span>
+                    <span class="c1"># Build example proto</span>
+                    <span class="n">example</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Example</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Features</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="n">feature</span><span class="p">))</span>
+
+                    <span class="c1"># Write example proto on tfrecord file</span>
+                    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">example</span><span class="o">.</span><span class="n">SerializeToString</span><span class="p">())</span>
 
         <span class="c1"># Split collection</span>
         <span class="n">spacing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">),</span> <span class="n">num_parallel_calls</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
@@ -398,7 +402,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.3.1',
+            VERSION:'0.3.2',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
