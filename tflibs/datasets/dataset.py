@@ -171,16 +171,20 @@ class BaseDataset:
                 # Write
                 writer = get_writer(i)
 
-                # Build feature proto
-                nested_feature = map_dict(lambda k, v: (k, v.feature_proto(processed[k])), self.feature_specs)
-                # Flatten nested dict
-                feature = flatten_nested_dict(nested_feature)
+                if not isinstance(processed, list):
+                    processed = [processed]
 
-                # Build example proto
-                example = tf.train.Example(features=tf.train.Features(feature=feature))
+                for processed_e in processed:
+                    # Build feature proto
+                    nested_feature = map_dict(lambda k, v: (k, v.feature_proto(processed_e[k])), self.feature_specs)
+                    # Flatten nested dict
+                    feature = flatten_nested_dict(nested_feature)
 
-                # Write example proto on tfrecord file
-                writer.write(example.SerializeToString())
+                    # Build example proto
+                    example = tf.train.Example(features=tf.train.Features(feature=feature))
+
+                    # Write example proto on tfrecord file
+                    writer.write(example.SerializeToString())
 
         # Split collection
         spacing = np.linspace(0, len(collection), num_parallel_calls + 1, dtype=np.int)
