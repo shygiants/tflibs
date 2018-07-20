@@ -164,7 +164,7 @@ class BaseDataset:
 
             for i, elem in tqdm(enumerate(coll), total=len(coll), position=thread_idx):
                 # Process
-                processed = process_fn(elem, self.feature_specs)
+                processed = process_fn(elem, self.feature_specs, None if test_size is None else i < test_size)
                 if processed is None:
                     continue
 
