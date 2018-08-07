@@ -5,7 +5,14 @@
 import tensorflow as tf
 
 
-def build_input_fn(dataset, batch_size, map_fn=None, global_step=None, num_elements=None, shuffle_and_repeat=True):
+def build_input_fn(dataset,
+                   batch_size,
+                   map_fn=None,
+                   global_step=None,
+                   num_elements=None,
+                   shuffle_and_repeat=True,
+                   shuffle_buffer_size=50,
+                   prefetch_buffer_size=20):
     num_elements = num_elements or _count_dataset(dataset)
     tf.logging.info('Number of elements in dataset {}: {}'.format(dataset, num_elements))
 
@@ -13,7 +20,7 @@ def build_input_fn(dataset, batch_size, map_fn=None, global_step=None, num_eleme
         dataset = dataset.skip(((global_step - 1) * batch_size) % num_elements)
 
     if shuffle_and_repeat:
-        dataset = dataset.apply(tf.contrib.data.shuffle_and_repeat(batch_size * 50))
+        dataset = dataset.apply(tf.contrib.data.shuffle_and_repeat(batch_size * shuffle_buffer_size))
 
     if map_fn is not None:
         dataset = dataset.apply(tf.contrib.data.map_and_batch(
@@ -21,7 +28,7 @@ def build_input_fn(dataset, batch_size, map_fn=None, global_step=None, num_eleme
     else:
         dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
 
-    dataset = dataset.prefetch(buffer_size=batch_size * 20)
+    dataset = dataset.prefetch(buffer_size=batch_size * prefetch_buffer_size)
 
     def input_fn():
         iterator = dataset.make_one_shot_iterator()
