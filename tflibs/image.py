@@ -27,3 +27,17 @@ def decode(string):
     :rtype: numpy.ndarray
     """
     return cv2.imdecode(np.fromstring(string, np.uint8), cv2.IMREAD_COLOR)[:, :, ::-1]
+
+
+def resize(img, dsize):
+    """
+    Resizes numpy.ndarray image to target size
+
+    :param numpy.ndarray img: numpy.ndarray of an image
+    :param tuple dsize: Target size (height, width)
+    :return: Resized image
+    :rtype: numpy.ndarray
+    """
+    (height, width) = dsize
+
+    return cv2.resize(img, dsize=(height, width))
