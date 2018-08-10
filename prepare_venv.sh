@@ -10,4 +10,4 @@ virtualenv --system-site-packages venv
 easy_install -U pip
 
 #pip install --upgrade tensorflow
-pip install -e .
+pip install -e .[dev]

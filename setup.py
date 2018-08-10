@@ -9,6 +9,11 @@ setup(
         'opencv-python',
         'requests',
     ],
+    extras_require={
+      'dev': [
+          'tensorflow'
+      ]
+    },
     version='0.3.5',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
