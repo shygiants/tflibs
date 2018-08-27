@@ -1,14 +1,33 @@
 import tensorflow as tf
 
 
+# TODO: Enum constants
+class Padding:
+    Constant = 'CONSTANT'
+    Reflect = 'REFLECT'
+    Symmetric = 'SYMMETRIC'
+
+
+class Norm:
+    Batch = tf.layers.batch_normalization
+    Instance = tf.contrib.layers.instance_norm
+    Layer = tf.contrib.layers.layer_norm
+
+
+class Nonlinear:
+    ReLU = tf.nn.relu
+    LeakyReLU = tf.nn.leaky_relu
+    NONE = None
+
+
 def conv2d(inputs,
            num_filters,
            kernel_size,
            strides=1,
            dilation_rate=1,
-           padding_mode='CONSTANT',
-           norm_fn=tf.contrib.layers.instance_norm,
-           non_linear_fn=tf.nn.relu,
+           padding_mode=Padding.Constant,
+           norm_fn=Norm.Instance,
+           non_linear_fn=Nonlinear.ReLU,
            use_bias=True,
            scope=None,
            reuse=None):
@@ -46,28 +65,50 @@ def deconv2d(inputs,
              num_filters,
              kernel_size,
              strides=1,
-             padding_mode='CONSTANT',
-             norm_fn=tf.contrib.layers.layer_norm,
-             non_linear_fn=tf.nn.relu,
+             padding_mode=Padding.Constant,
+             norm_fn=Norm.Layer,
+             non_linear_fn=Nonlinear.ReLU,
              use_bias=True,
+             method='NNConv',
              scope=None,
              reuse=None):
     with tf.variable_scope(scope, 'Deconv2d_{kernel_size}x{kernel_size}_{num_filters}'.format(kernel_size=kernel_size,
                                                                                               num_filters=num_filters),
                            values=[inputs], reuse=reuse):
-        if strides > 1:
-            shape = inputs.shape.as_list()[1:3]
-            inputs = tf.image.resize_nearest_neighbor(inputs, map(lambda e: e * strides, shape))
+        if method == 'NNConv':
+            if strides > 1:
+                shape = inputs.shape.as_list()[1:3]
+                inputs = tf.image.resize_nearest_neighbor(inputs, map(lambda e: e * strides, shape))
 
-        # Conv
-        inputs = conv2d(inputs,
-                        num_filters,
-                        kernel_size,
-                        strides=1,
-                        padding_mode=padding_mode,
-                        norm_fn=norm_fn,
-                        non_linear_fn=non_linear_fn,
-                        use_bias=use_bias)
+            # Conv
+            inputs = conv2d(inputs,
+                            num_filters,
+                            kernel_size,
+                            strides=1,
+                            padding_mode=padding_mode,
+                            norm_fn=norm_fn,
+                            non_linear_fn=non_linear_fn,
+                            use_bias=use_bias)
+        else:
+            # Padding
+            if padding_mode.upper() != 'NONE':
+                padding = [((kernel_size - 1) + 1 - strides) / 2] * 2
+                inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
+
+            inputs = tf.layers.conv2d_transpose(inputs,
+                                                num_filters,
+                                                kernel_size,
+                                                strides=(strides, strides),
+                                                padding='VALID',
+                                                use_bias=use_bias)
+
+            # Normalization
+            if norm_fn:
+                inputs = norm_fn(inputs)
+
+            # Non-linearity
+            if non_linear_fn:
+                inputs = non_linear_fn(inputs)
 
         tf.add_to_collection(tf.GraphKeys.ACTIVATIONS, inputs)
 
@@ -76,9 +117,9 @@ def deconv2d(inputs,
 
 def residual_block(inputs,
                    num_filters,
-                   padding_mode='CONSTANT',
-                   norm_fn=tf.contrib.layers.instance_norm,
-                   non_linear_fn=tf.nn.relu,
+                   padding_mode=Padding.Constant,
+                   norm_fn=Norm.Instance,
+                   non_linear_fn=Nonlinear.ReLU,
                    scope=None,
                    reuse=None):
     with tf.variable_scope(scope, 'Residual_Block', values=[inputs], reuse=reuse):
@@ -91,8 +132,8 @@ def residual_block(inputs,
 
 def linear(inputs,
            num_units,
-           norm_fn=tf.contrib.layers.instance_norm,
-           non_linear_fn=tf.nn.relu,
+           norm_fn=Norm.Instance,
+           non_linear_fn=Nonlinear.ReLU,
            use_bias=True,
            scope=None,
            reuse=None):
@@ -122,4 +163,3 @@ def adaptive_instance_norm(inputs, gamma, beta, scope=None):
         inputs = gamma * inputs + beta
 
         return inputs
-

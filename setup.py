@@ -5,16 +5,15 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=[
         'tqdm',
-        'numpy',
         'opencv-python',
         'requests',
     ],
     extras_require={
       'dev': [
-          'tensorflow'
+          'tensorflow==1.10.0'
       ]
     },
-    version='0.3.5',
+    version='0.3.6',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',
