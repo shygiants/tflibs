@@ -6,18 +6,27 @@ class Padding:
     Constant = 'CONSTANT'
     Reflect = 'REFLECT'
     Symmetric = 'SYMMETRIC'
+    NONE = 'NONE'
 
 
 class Norm:
     Batch = tf.layers.batch_normalization
     Instance = tf.contrib.layers.instance_norm
     Layer = tf.contrib.layers.layer_norm
+    NONE = None
 
 
 class Nonlinear:
     ReLU = tf.nn.relu
     LeakyReLU = tf.nn.leaky_relu
+    Sigmoid = tf.nn.sigmoid
+    Tanh = tf.nn.tanh
     NONE = None
+
+
+class DeconvMethod:
+    NNConv = 'NNConv'
+    ConvTranspose = 'ConvTranspose'
 
 
 def conv2d(inputs,
@@ -35,7 +44,7 @@ def conv2d(inputs,
                                                                                             num_filters=num_filters),
                            values=[inputs], reuse=reuse):
         # Padding
-        if padding_mode.upper() != 'NONE':
+        if padding_mode.upper() != Padding.NONE:
             padding = [((kernel_size - 1) * dilation_rate + 1 - strides) / 2] * 2
             inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
 
@@ -69,13 +78,13 @@ def deconv2d(inputs,
              norm_fn=Norm.Layer,
              non_linear_fn=Nonlinear.ReLU,
              use_bias=True,
-             method='NNConv',
+             method=DeconvMethod.NNConv,
              scope=None,
              reuse=None):
     with tf.variable_scope(scope, 'Deconv2d_{kernel_size}x{kernel_size}_{num_filters}'.format(kernel_size=kernel_size,
                                                                                               num_filters=num_filters),
                            values=[inputs], reuse=reuse):
-        if method == 'NNConv':
+        if method == DeconvMethod.NNConv:
             if strides > 1:
                 shape = inputs.shape.as_list()[1:3]
                 inputs = tf.image.resize_nearest_neighbor(inputs, map(lambda e: e * strides, shape))
@@ -89,9 +98,9 @@ def deconv2d(inputs,
                             norm_fn=norm_fn,
                             non_linear_fn=non_linear_fn,
                             use_bias=use_bias)
-        else:
+        elif method == DeconvMethod.ConvTranspose:
             # Padding
-            if padding_mode.upper() != 'NONE':
+            if padding_mode.upper() != Padding.NONE:
                 padding = [((kernel_size - 1) + 1 - strides) / 2] * 2
                 inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
 
@@ -109,6 +118,10 @@ def deconv2d(inputs,
             # Non-linearity
             if non_linear_fn:
                 inputs = non_linear_fn(inputs)
+
+        else:
+            raise ValueError('`method` should be either {} or {}'.format(DeconvMethod.NNConv,
+                                                                         DeconvMethod.ConvTranspose))
 
         tf.add_to_collection(tf.GraphKeys.ACTIVATIONS, inputs)
 
