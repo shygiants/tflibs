@@ -10,18 +10,42 @@ class Padding:
 
 
 class Norm:
-    Batch = tf.layers.batch_normalization
-    Instance = tf.contrib.layers.instance_norm
-    Layer = tf.contrib.layers.layer_norm
+    Batch = 'Batch'
+    Instance = 'Instance'
+    Layer = 'Layer'
     NONE = None
+
+    @classmethod
+    def get(cls, name):
+        if name == cls.Batch:
+            return tf.layers.batch_normalization
+        elif name == cls.Instance:
+            return tf.contrib.layers.instance_norm
+        elif name == cls.Layer:
+            return tf.contrib.layers.layer_norm
+        else:
+            raise ValueError()
 
 
 class Nonlinear:
-    ReLU = tf.nn.relu
-    LeakyReLU = tf.nn.leaky_relu
-    Sigmoid = tf.nn.sigmoid
-    Tanh = tf.nn.tanh
+    ReLU = 'ReLU'
+    LeakyReLU = 'LeakyReLU'
+    Sigmoid = 'Sigmoid'
+    Tanh = 'Tanh'
     NONE = None
+
+    @classmethod
+    def get(cls, name):
+        if name == cls.ReLU:
+            return tf.nn.relu
+        elif name == cls.LeakyReLU:
+            return tf.nn.leaky_relu
+        elif name == cls.Sigmoid:
+            return tf.nn.sigmoid
+        elif name == cls.Tanh:
+            return tf.nn.tanh
+        else:
+            raise ValueError()
 
 
 class DeconvMethod:
@@ -58,11 +82,15 @@ def conv2d(inputs,
                                   use_bias=use_bias)
 
         # Normalization
-        if norm_fn:
+        if norm_fn is not None:
+            if not callable(norm_fn):
+                norm_fn = Norm.get(norm_fn)
             inputs = norm_fn(inputs)
 
         # Non-linearity
-        if non_linear_fn:
+        if non_linear_fn is not None:
+            if not callable(non_linear_fn):
+                non_linear_fn = Nonlinear.get(non_linear_fn)
             inputs = non_linear_fn(inputs)
 
         tf.add_to_collection(tf.GraphKeys.ACTIVATIONS, inputs)
@@ -112,11 +140,15 @@ def deconv2d(inputs,
                                                 use_bias=use_bias)
 
             # Normalization
-            if norm_fn:
+            if norm_fn is not None:
+                if not callable(norm_fn):
+                    norm_fn = Norm.get(norm_fn)
                 inputs = norm_fn(inputs)
 
             # Non-linearity
-            if non_linear_fn:
+            if non_linear_fn is not None:
+                if not callable(non_linear_fn):
+                    non_linear_fn = Nonlinear.get(non_linear_fn)
                 inputs = non_linear_fn(inputs)
 
         else:
@@ -138,7 +170,7 @@ def residual_block(inputs,
     with tf.variable_scope(scope, 'Residual_Block', values=[inputs], reuse=reuse):
         shortcut = inputs
         inputs = conv2d(inputs, num_filters, 3, padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=non_linear_fn)
-        inputs = conv2d(inputs, num_filters, 3, padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=None)
+        inputs = conv2d(inputs, num_filters, 3, padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=Nonlinear.NONE)
 
         return inputs + shortcut
 
@@ -158,11 +190,15 @@ def linear(inputs,
                                  use_bias=use_bias)
 
         # Normalization
-        if norm_fn:
+        if norm_fn is not None:
+            if not callable(norm_fn):
+                norm_fn = Norm.get(norm_fn)
             inputs = norm_fn(inputs)
 
         # Non-linearity
-        if non_linear_fn:
+        if non_linear_fn is not None:
+            if not callable(non_linear_fn):
+                non_linear_fn = Nonlinear.get(non_linear_fn)
             inputs = non_linear_fn(inputs)
 
         tf.add_to_collection(tf.GraphKeys.ACTIVATIONS, inputs)
