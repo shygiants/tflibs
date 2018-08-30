@@ -127,16 +127,11 @@ def deconv2d(inputs,
                             non_linear_fn=non_linear_fn,
                             use_bias=use_bias)
         elif method == DeconvMethod.ConvTranspose:
-            # Padding
-            if padding_mode.upper() != Padding.NONE:
-                padding = [((kernel_size - 1) + 1 - strides) / 2] * 2
-                inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
-
             inputs = tf.layers.conv2d_transpose(inputs,
                                                 num_filters,
                                                 kernel_size,
                                                 strides=(strides, strides),
-                                                padding='VALID',
+                                                padding='SAME',
                                                 use_bias=use_bias)
 
             # Normalization

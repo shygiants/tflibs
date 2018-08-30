@@ -13,7 +13,7 @@ setup(
           'tensorflow==1.10.0'
       ]
     },
-    version='0.3.8',
+    version='0.3.9',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',
