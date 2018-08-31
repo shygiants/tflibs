@@ -70,7 +70,8 @@ def conv2d(inputs,
                            values=[inputs], reuse=reuse):
         # Padding
         if padding_mode.upper() != Padding.NONE:
-            padding = [int(math.ceil(float(kernel_size + (kernel_size - 1) * (dilation_rate - 1) - strides) / 2.))] * 2
+            padding = kernel_size + (kernel_size - 1) * (dilation_rate - 1) - strides
+            padding = [padding / 2, padding - padding / 2]
             inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
 
         # Conv
