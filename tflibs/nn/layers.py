@@ -1,4 +1,5 @@
 import tensorflow as tf
+import math
 
 
 # TODO: Enum constants
@@ -69,7 +70,7 @@ def conv2d(inputs,
                            values=[inputs], reuse=reuse):
         # Padding
         if padding_mode.upper() != Padding.NONE:
-            padding = [((kernel_size - 1) * dilation_rate + 1 - strides) / 2] * 2
+            padding = [int(math.ceil(float(kernel_size + (kernel_size - 1) * (dilation_rate - 1) - strides) / 2.))] * 2
             inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
 
         # Conv
