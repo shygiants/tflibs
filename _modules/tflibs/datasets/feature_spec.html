@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.datasets.feature_spec &mdash; tflibs 0.3.10 documentation</title>
+  <title>tflibs.datasets.feature_spec &mdash; tflibs 0.4.0 documentation</title>
   
 
   
@@ -145,6 +145,9 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    See the guides: `Dataset &lt;./Dataset.html&gt;`_</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -479,7 +482,7 @@
 <div class="viewcode-block" id="MultiLabelSpec.create_with_labels"><a class="viewcode-back" href="../../../FeatureSpec.html#tflibs.datasets.feature_spec.MultiLabelSpec.create_with_labels">[docs]</a>    <span class="k">def</span> <span class="nf">create_with_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
         <span class="c1"># TODO: Assert bad labels don&#39;t exist</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;tensor&#39;</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="bp">cls</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span><span class="p">)</span>
+            <span class="s1">&#39;tensor&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="bp">cls</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_names</span><span class="p">))</span>
         <span class="p">}</span></div></div>
 </pre></div>
 
@@ -515,7 +518,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.3.10',
+            VERSION:'0.4.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

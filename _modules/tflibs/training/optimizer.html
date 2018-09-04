@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.training.optimizer &mdash; tflibs 0.3.10 documentation</title>
+  <title>tflibs.training.optimizer &mdash; tflibs 0.4.0 documentation</title>
   
 
   
@@ -145,6 +145,9 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optimizer</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
@@ -217,12 +220,12 @@
             <span class="k">return</span> <span class="n">tower_grads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">def</span> <span class="nf">filter_no_gradients</span><span class="p">(</span><span class="n">grad_and_vars</span><span class="p">):</span>
-            <span class="k">return</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span> <span class="n">g</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grad_and_vars</span><span class="p">))</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">gv</span><span class="p">:</span> <span class="n">gv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grad_and_vars</span><span class="p">))</span>
 
         <span class="k">def</span> <span class="nf">reduce_gradients</span><span class="p">(</span><span class="n">grad_and_vars</span><span class="p">):</span>
             <span class="c1"># Note that each grad_and_vars looks like the following:</span>
             <span class="c1">#   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))</span>
-            <span class="n">grads</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span> <span class="n">g</span><span class="p">,</span> <span class="n">grad_and_vars</span><span class="p">)</span>
+            <span class="n">grads</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">gv</span><span class="p">:</span> <span class="n">gv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">grad_and_vars</span><span class="p">))</span>
 
             <span class="c1"># Get average gradients</span>
             <span class="n">grads</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span>
@@ -232,7 +235,7 @@
             <span class="n">var</span> <span class="o">=</span> <span class="n">grad_and_vars</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="n">var</span>
 
-        <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="n">reduce_gradients</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="n">filter_no_gradients</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">tower_grads</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">reduce_gradients</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="n">filter_no_gradients</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">tower_grads</span><span class="p">))))</span>
 
 <div class="viewcode-block" id="Optimizer.dying_decay"><a class="viewcode-back" href="../../../Optimizer.html#tflibs.training.optimizer.Optimizer.dying_decay">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">dying_decay</span><span class="p">(</span><span class="n">starter_learning_rate</span><span class="p">,</span> <span class="n">train_iters</span><span class="p">,</span> <span class="n">decay_iters</span><span class="p">,</span> <span class="n">decay_steps</span><span class="p">):</span>
@@ -255,7 +258,7 @@
     <span class="k">def</span> <span class="nf">step_decay</span><span class="p">(</span><span class="n">starter_learning_rate</span><span class="p">,</span> <span class="n">train_iters</span><span class="p">,</span> <span class="n">decay_steps</span><span class="p">,</span> <span class="n">decay_rate</span><span class="p">):</span>
         <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">get_or_create_global_step</span><span class="p">()</span>
 
-        <span class="n">num_decay</span> <span class="o">=</span> <span class="n">train_iters</span> <span class="o">/</span> <span class="n">decay_steps</span>
+        <span class="n">num_decay</span> <span class="o">=</span> <span class="n">train_iters</span> <span class="o">//</span> <span class="n">decay_steps</span>
 
         <span class="n">boundaries</span> <span class="o">=</span> <span class="p">[</span><span class="n">decay_steps</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_decay</span><span class="p">)]</span>
         <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">starter_learning_rate</span> <span class="o">*</span> <span class="n">decay_rate</span> <span class="o">**</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_decay</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
@@ -297,7 +300,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.3.10',
+            VERSION:'0.4.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

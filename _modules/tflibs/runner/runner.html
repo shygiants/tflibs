@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.runner.runner &mdash; tflibs 0.3.10 documentation</title>
+  <title>tflibs.runner.runner &mdash; tflibs 0.4.0 documentation</title>
   
 
   
@@ -145,9 +145,13 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runner</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">functools</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
@@ -161,6 +165,7 @@
 <span class="sd">    :param initializers: Initializers</span>
 <span class="sd">    :param default_job_dir: Default job directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="p">[],</span> <span class="n">default_job_dir</span><span class="o">=</span><span class="s1">&#39;/tmp/job-dir&#39;</span><span class="p">,</span> <span class="n">no_job_dir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">initializers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_argparser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
@@ -232,14 +237,15 @@
         <span class="n">parse_args</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">handled</span><span class="p">)</span>
 
         <span class="c1"># Handle arguments with initializer</span>
-        <span class="k">def</span> <span class="nf">handle</span><span class="p">((</span><span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">),</span> <span class="n">initializer</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="n">reducing</span><span class="p">,</span> <span class="n">initializer</span><span class="p">):</span>
+            <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">reducing</span>
             <span class="n">handled</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">initializer</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">)</span>
             <span class="n">handled</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">parse_args</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">handled</span><span class="p">),</span> <span class="n">unknown</span>
 
-        <span class="n">handled_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span>
-                                       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
-                                       <span class="p">(</span><span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">))</span>
+        <span class="n">handled_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
+                                                 <span class="p">(</span><span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown arguments: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">unknown</span><span class="p">))</span>
@@ -285,7 +291,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.3.10',
+            VERSION:'0.4.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
