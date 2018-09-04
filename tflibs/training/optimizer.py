@@ -1,6 +1,9 @@
 """
     Optimizer
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import tensorflow as tf
 
@@ -73,12 +76,12 @@ class Optimizer:
             return tower_grads[0]
 
         def filter_no_gradients(grad_and_vars):
-            return not any(map(lambda (g, _): g is None, grad_and_vars))
+            return not any(map(lambda gv: gv[0] is None, grad_and_vars))
 
         def reduce_gradients(grad_and_vars):
             # Note that each grad_and_vars looks like the following:
             #   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))
-            grads = map(lambda (g, _): g, grad_and_vars)
+            grads = list(map(lambda gv: gv[0], grad_and_vars))
 
             # Get average gradients
             grads = tf.stack(grads)
@@ -88,7 +91,7 @@ class Optimizer:
             var = grad_and_vars[0][1]
             return grad, var
 
-        return map(reduce_gradients, filter(filter_no_gradients, zip(*tower_grads)))
+        return list(map(reduce_gradients, filter(filter_no_gradients, zip(*tower_grads))))
 
     @staticmethod
     def dying_decay(starter_learning_rate, train_iters, decay_iters, decay_steps):
@@ -111,7 +114,7 @@ class Optimizer:
     def step_decay(starter_learning_rate, train_iters, decay_steps, decay_rate):
         global_step = tf.train.get_or_create_global_step()
 
-        num_decay = train_iters / decay_steps
+        num_decay = train_iters // decay_steps
 
         boundaries = [decay_steps * (i + 1) for i in range(num_decay)]
         values = [starter_learning_rate * decay_rate ** i for i in range(num_decay + 1)]

@@ -1,6 +1,9 @@
 """
     See the guides: `Dataset <./Dataset.html>`_
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import tensorflow as tf
 import numpy as np
@@ -335,5 +338,5 @@ class MultiLabelSpec(FeatureSpec):
     def create_with_labels(self, labels):
         # TODO: Assert bad labels don't exist
         return {
-            'tensor': map(lambda cls: int(cls in labels), self._class_names)
+            'tensor': list(map(lambda cls: int(cls in labels), self._class_names))
         }

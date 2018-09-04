@@ -1,5 +1,8 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import tensorflow as tf
-import math
 
 
 # TODO: Enum constants
@@ -71,7 +74,7 @@ def conv2d(inputs,
         # Padding
         if padding_mode.upper() != Padding.NONE:
             padding = kernel_size + (kernel_size - 1) * (dilation_rate - 1) - strides
-            padding = [padding / 2, padding - padding / 2]
+            padding = [padding // 2, padding - padding // 2]
             inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
 
         # Conv
@@ -117,7 +120,7 @@ def deconv2d(inputs,
         if method == DeconvMethod.NNConv:
             if strides > 1:
                 shape = inputs.shape.as_list()[1:3]
-                inputs = tf.image.resize_nearest_neighbor(inputs, map(lambda e: e * strides, shape))
+                inputs = tf.image.resize_nearest_neighbor(inputs, list(map(lambda e: e * strides, shape)))
 
             # Conv
             inputs = conv2d(inputs,

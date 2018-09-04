@@ -1,9 +1,13 @@
 """
     Runner
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import os
 import argparse
+import functools
 
 import tensorflow as tf
 
@@ -17,6 +21,7 @@ class Runner:
     :param initializers: Initializers
     :param default_job_dir: Default job directory
     """
+
     def __init__(self, initializers=[], default_job_dir='/tmp/job-dir', no_job_dir=False):
         self._initializers = initializers
         self._argparser = argparse.ArgumentParser()
@@ -88,14 +93,15 @@ class Runner:
         parse_args = argparse.Namespace(**handled)
 
         # Handle arguments with initializer
-        def handle((parse_args, unknown), initializer):
+        def handle(reducing, initializer):
+            parse_args, unknown = reducing
             handled, unknown = initializer.handle(parse_args, unknown)
             handled.update(vars(parse_args))
             return argparse.Namespace(**handled), unknown
 
-        handled_args, unknown = reduce(handle,
-                                       self._initializers,
-                                       (parse_args, unknown))
+        handled_args, unknown = functools.reduce(handle,
+                                                 self._initializers,
+                                                 (parse_args, unknown))
 
         if unknown:
             raise ValueError('Unknown arguments: {}'.format(unknown))

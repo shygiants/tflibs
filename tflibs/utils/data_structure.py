@@ -1,10 +1,13 @@
 """
     Utils
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 
 def _prepend(key, dic):
-    items = map(lambda (k, v): ('{}/{}'.format(key, k), v), dic.iteritems())
+    items = list(map(lambda item: ('{}/{}'.format(key, item[0]), item[1]), dic.items()))
     return dict(items)
 
 
@@ -14,7 +17,7 @@ def flatten_nested_dict(nested_dict):
 
 
 def _nested_dict_item_gen(nested_dict):
-    for (k, v) in nested_dict.iteritems():
+    for (k, v) in nested_dict.items():
         if not isinstance(v, dict):
             yield (k, v)
         else:
@@ -23,4 +26,4 @@ def _nested_dict_item_gen(nested_dict):
 
 
 def map_dict(map_fn, original_dict):
-    return dict(map(lambda (k, v): map_fn(k, v), original_dict.iteritems()))
+    return dict(map(lambda item: map_fn(item[0], item[1]), original_dict.items()))

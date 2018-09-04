@@ -2,6 +2,9 @@
     Image ops
     ~~~~~~~~~
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import tensorflow as tf
 
@@ -37,6 +40,6 @@ def normalize_images(images):
 
 def concat_images(*list_images):
     with tf.name_scope('concat_images', values=list_images):
-        list_images = map(normalize_images, list_images)
+        list_images = list(map(normalize_images, list_images))
 
         return tf.concat(list_images, 2)

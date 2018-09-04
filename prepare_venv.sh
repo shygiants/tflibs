@@ -3,10 +3,10 @@
 sudo easy_install pip
 pip install --upgrade virtualenv
 
-virtualenv --system-site-packages venv
+virtualenv --system-site-packages venv -p python3
 
 . ./venv/bin/activate
 
 easy_install -U pip
 
-pip install -e .[dev]
+pip3 install -e .[dev]

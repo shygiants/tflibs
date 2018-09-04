@@ -1,6 +1,9 @@
 """
     Dispatches operations over multiple GPU devices and calculates tower loss
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import tensorflow as tf
 
@@ -19,21 +22,22 @@ class Dispatcher:
     """
 
     def __init__(self, model_cls, model_param, gpus, features, labels=None):
+        gpus = list(gpus)
         num_gpus = len(gpus)
 
         # Split inputs
         split_feature_dict = map_dict(lambda k, v: (k, tf.split(v, num_gpus)), features)
-        split_features = map(lambda gpu: map_dict(lambda k, v: (k, v[gpu]), split_feature_dict), gpus)
+        split_features = list(map(lambda gpu: map_dict(lambda k, v: (k, v[gpu]), split_feature_dict), gpus))
 
         args = [gpus, split_features]
         if labels is not None:
             split_labels = tf.split(labels, num_gpus)
             args.append(split_labels)
 
-        self._models = map(lambda args: model_cls(args[0] == 0,
-                                                  *(args[1:]),
-                                                  **model_param),
-                           zip(*args))
+        self._models = list(map(lambda args: model_cls(args[0] == 0,
+                                                       *(args[1:]),
+                                                       **model_param),
+                                zip(*args)))
 
     def minimize(self, optimizer, loss_fn, depends=None, global_step=None):
         """
@@ -48,12 +52,13 @@ class Dispatcher:
         if not isinstance(depends, (tuple, list)):
             depends = [depends] if depends is not None else None
         with tf.control_dependencies(depends):
-            def compute_grad((device_id, model)):
+            def compute_grad(tup):
+                device_id, model = tup
                 with tf.device(device_setter('/gpu:{}'.format(device_id))):
                     loss = loss_fn(model)
                     return optimizer.compute_grad(loss)
 
-            tower_grads = map(compute_grad, enumerate(self._models))
+            tower_grads = list(map(compute_grad, enumerate(self._models)))
             apply_grad_op = optimizer.apply_tower_gradients(tower_grads, global_step=global_step)
 
             return apply_grad_op
@@ -64,4 +69,4 @@ class Dispatcher:
 
     @property
     def chief(self):
-        return filter(lambda model: model.is_chief, self.models)[0]
+        return next(filter(lambda model: model.is_chief, self.models))

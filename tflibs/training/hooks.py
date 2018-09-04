@@ -1,6 +1,9 @@
 """
     Session Run Hooks
 """
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import threading
 import os
@@ -69,7 +72,8 @@ class ImageSaverHook(tf.train.SessionRunHook):
     def __init__(self,
                  images,
                  image_dir):
-        self.run_args = dict(map(lambda (k, v): (k, tf.image.convert_image_dtype(v, tf.uint8)), images.iteritems()))
+        self.run_args = dict(
+            map(lambda item: (item[0], tf.image.convert_image_dtype(item[1], tf.uint8)), images.items()))
         self.image_dir = image_dir
         self.iter = 0
 
