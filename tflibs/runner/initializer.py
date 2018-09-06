@@ -242,3 +242,65 @@ class TrainInitializer(ModelInitializer):
             params=model_params)
 
         return {'estimator': estimator}, unknown
+
+
+class EvalInitializer(ModelInitializer):
+    def add_arguments(self, argparser):
+        """
+        Adds arguments.
+
+        Adds arguments of `ModelInitializer`.
+
+        * --model-name
+
+        :param argparse.ArgumentParser argparser: Argument parser used to add arguments.
+        """
+        ModelInitializer.add_arguments(self, argparser)
+
+    def handle(self, parse_args, unknown):
+        """
+        Handles arguments.
+
+        Parses model-specific arguments.
+
+        * model_args: Common arguments. See: `tflib.model.Model.add_model_args() <./tflibs.model.html#tflibs.model.Model.add_model_args>`_
+        * eval_args: Evaluation arguments. See: `tflib.model.Model.add_eval_args() <./tflibs.model.html#tflibs.model.Model.add_eval_args>`_
+
+        :param argparse.Namespace parse_args: Parsed arguments.
+        :param list unknown: A list of unknown arguments. Exhaust these list.
+        :return: A tuple of a dict of handled arguments and unknown arguments.
+        :rtype: tuple
+        """
+        handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
+
+        model_cls = handled_args['model_cls']
+
+        # Parse model-specific arguments
+        parser = argparse.ArgumentParser()
+        model_cls.add_model_args(parser, parse_args)
+        model_args, unknown = parser.parse_known_args(unknown)
+        log_parse_args(model_args, 'Model arguments')
+
+        # Parse model-specific eval arguments
+        parser = argparse.ArgumentParser()
+        model_cls.add_eval_args(parser, parse_args)
+        eval_args, unknown = parser.parse_known_args(unknown)
+        log_parse_args(eval_args, 'Eval arguments')
+
+        model_params = {
+            'model_args': vars(model_args),
+            'eval_args': vars(eval_args),
+        }
+
+        session_config = tf.ConfigProto(log_device_placement=False,
+                                        allow_soft_placement=False)
+
+        run_config = tf.estimator.RunConfig().replace(session_config=session_config)
+
+        estimator = tf.estimator.Estimator(
+            model_cls.model_fn,
+            model_dir=parse_args.job_dir,
+            config=run_config,
+            params=model_params)
+
+        return {'estimator': estimator}, unknown
