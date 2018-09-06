@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.runner.initializer &mdash; tflibs 0.4.0 documentation</title>
+  <title>tflibs.runner.initializer &mdash; tflibs 0.4.1 documentation</title>
   
 
   
@@ -386,6 +386,68 @@
             <span class="n">params</span><span class="o">=</span><span class="n">model_params</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;estimator&#39;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">},</span> <span class="n">unknown</span></div></div>
+
+
+<div class="viewcode-block" id="EvalInitializer"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.EvalInitializer">[docs]</a><span class="k">class</span> <span class="nc">EvalInitializer</span><span class="p">(</span><span class="n">ModelInitializer</span><span class="p">):</span>
+<div class="viewcode-block" id="EvalInitializer.add_arguments"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.EvalInitializer.add_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds arguments.</span>
+
+<span class="sd">        Adds arguments of `ModelInitializer`.</span>
+
+<span class="sd">        * --model-name</span>
+
+<span class="sd">        :param argparse.ArgumentParser argparser: Argument parser used to add arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ModelInitializer</span><span class="o">.</span><span class="n">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argparser</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EvalInitializer.handle"><a class="viewcode-back" href="../../../Initializers.html#tflibs.runner.initializer.EvalInitializer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handles arguments.</span>
+
+<span class="sd">        Parses model-specific arguments.</span>
+
+<span class="sd">        * model_args: Common arguments. See: `tflib.model.Model.add_model_args() &lt;./tflibs.model.html#tflibs.model.Model.add_model_args&gt;`_</span>
+<span class="sd">        * eval_args: Evaluation arguments. See: `tflib.model.Model.add_eval_args() &lt;./tflibs.model.html#tflibs.model.Model.add_eval_args&gt;`_</span>
+
+<span class="sd">        :param argparse.Namespace parse_args: Parsed arguments.</span>
+<span class="sd">        :param list unknown: A list of unknown arguments. Exhaust these list.</span>
+<span class="sd">        :return: A tuple of a dict of handled arguments and unknown arguments.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">handled_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">ModelInitializer</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">,</span> <span class="n">unknown</span><span class="p">)</span>
+
+        <span class="n">model_cls</span> <span class="o">=</span> <span class="n">handled_args</span><span class="p">[</span><span class="s1">&#39;model_cls&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Parse model-specific arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="n">model_cls</span><span class="o">.</span><span class="n">add_model_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
+        <span class="n">model_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">model_args</span><span class="p">,</span> <span class="s1">&#39;Model arguments&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Parse model-specific eval arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="n">model_cls</span><span class="o">.</span><span class="n">add_eval_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parse_args</span><span class="p">)</span>
+        <span class="n">eval_args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span>
+        <span class="n">log_parse_args</span><span class="p">(</span><span class="n">eval_args</span><span class="p">,</span> <span class="s1">&#39;Eval arguments&#39;</span><span class="p">)</span>
+
+        <span class="n">model_params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;model_args&#39;</span><span class="p">:</span> <span class="nb">vars</span><span class="p">(</span><span class="n">model_args</span><span class="p">),</span>
+            <span class="s1">&#39;eval_args&#39;</span><span class="p">:</span> <span class="nb">vars</span><span class="p">(</span><span class="n">eval_args</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="n">session_config</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ConfigProto</span><span class="p">(</span><span class="n">log_device_placement</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                        <span class="n">allow_soft_placement</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">run_config</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">RunConfig</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">session_config</span><span class="o">=</span><span class="n">session_config</span><span class="p">)</span>
+
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">Estimator</span><span class="p">(</span>
+            <span class="n">model_cls</span><span class="o">.</span><span class="n">model_fn</span><span class="p">,</span>
+            <span class="n">model_dir</span><span class="o">=</span><span class="n">parse_args</span><span class="o">.</span><span class="n">job_dir</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">run_config</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">model_params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;estimator&#39;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">},</span> <span class="n">unknown</span></div></div>
 </pre></div>
 
            </div>
@@ -420,7 +482,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.4.0',
+            VERSION:'0.4.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
