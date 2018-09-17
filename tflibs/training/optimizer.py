@@ -6,6 +6,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+import numpy as np
 
 from tflibs.utils import strip_illegal_summary_name
 
@@ -19,6 +20,8 @@ class Optimizer:
             self._learning_rate = self.dying_decay(learning_rate, **decay_params)
         elif decay_policy == 'step':
             self._learning_rate = self.step_decay(learning_rate, **decay_params)
+        elif decay_policy == 'lambda':
+            self._learning_rate = self.lambda_decay(learning_rate, **decay_params)
         else:
             raise ValueError('`decay_policy` should be `none`, `dying` or `step`.')
 
@@ -122,3 +125,12 @@ class Optimizer:
         learning_rate = tf.train.piecewise_constant(global_step, boundaries, values)
 
         return learning_rate
+
+    @staticmethod
+    def lambda_decay(starter_learning_rate, lr_fn):
+        global_step = tf.train.get_or_create_global_step()
+
+        def fn(global_step, learning_rate):
+            return np.float32(lr_fn(int(global_step), float(learning_rate)))
+
+        return tf.py_func(fn, [global_step, starter_learning_rate], tf.float32)

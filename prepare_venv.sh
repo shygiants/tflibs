@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
-sudo easy_install pip
-pip install --upgrade virtualenv
+eval "$(pyenv init - )"
 
-virtualenv --system-site-packages venv -p python3
+pyenv virtualenv --system-site-packages 3.5.2 tflibs
+pyenv activate tflibs
 
-. ./venv/bin/activate
-
-easy_install -U pip
-
-pip3 install -e .[dev]
+pip install -e .[dev]
