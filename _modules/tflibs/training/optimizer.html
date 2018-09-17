@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tflibs.training.optimizer &mdash; tflibs 0.4.1 documentation</title>
+  <title>tflibs.training.optimizer &mdash; tflibs 0.5.0 documentation</title>
   
 
   
@@ -150,6 +150,7 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">tflibs.utils</span> <span class="k">import</span> <span class="n">strip_illegal_summary_name</span>
 
@@ -163,6 +164,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dying_decay</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">decay_params</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">decay_policy</span> <span class="o">==</span> <span class="s1">&#39;step&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_decay</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">decay_params</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">decay_policy</span> <span class="o">==</span> <span class="s1">&#39;lambda&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lambda_decay</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">decay_params</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`decay_policy` should be `none`, `dying` or `step`.&#39;</span><span class="p">)</span>
 
@@ -265,7 +268,16 @@
 
         <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">piecewise_constant</span><span class="p">(</span><span class="n">global_step</span><span class="p">,</span> <span class="n">boundaries</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">learning_rate</span></div></div>
+        <span class="k">return</span> <span class="n">learning_rate</span></div>
+
+<div class="viewcode-block" id="Optimizer.lambda_decay"><a class="viewcode-back" href="../../../Optimizer.html#tflibs.training.optimizer.Optimizer.lambda_decay">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">lambda_decay</span><span class="p">(</span><span class="n">starter_learning_rate</span><span class="p">,</span> <span class="n">lr_fn</span><span class="p">):</span>
+        <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">get_or_create_global_step</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">global_step</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">lr_fn</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">global_step</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="p">[</span><span class="n">global_step</span><span class="p">,</span> <span class="n">starter_learning_rate</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
@@ -300,7 +312,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'0.4.1',
+            VERSION:'0.5.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
