@@ -165,12 +165,15 @@ def residual_block(inputs,
                    padding_mode=Padding.Constant,
                    norm_fn=Norm.Instance,
                    non_linear_fn=Nonlinear.ReLU,
+                   use_bias=True,
                    scope=None,
                    reuse=None):
     with tf.variable_scope(scope, 'Residual_Block', values=[inputs], reuse=reuse):
         shortcut = inputs
-        inputs = conv2d(inputs, num_filters, 3, padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=non_linear_fn)
-        inputs = conv2d(inputs, num_filters, 3, padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=Nonlinear.NONE)
+        inputs = conv2d(inputs, num_filters, 3,
+                        padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=non_linear_fn, use_bias=use_bias)
+        inputs = conv2d(inputs, num_filters, 3,
+                        padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=Nonlinear.NONE, use_bias=use_bias)
 
         return inputs + shortcut
 
