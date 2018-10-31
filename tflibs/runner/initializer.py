@@ -154,7 +154,7 @@ class TrainInitializer(ModelInitializer):
                                help='The number of steps to save the model.')
         argparser.add_argument('--keep-checkpoint-max',
                                type=int,
-                               default=100,
+                               default=500,
                                help='The maximum number of checkpoint file to keep.')
         argparser.add_argument('--log-steps',
                                type=int,

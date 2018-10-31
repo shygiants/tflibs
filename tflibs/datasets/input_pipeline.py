@@ -29,7 +29,7 @@ def build_input_fn(dataset,
         dataset = dataset.apply(tf.contrib.data.map_and_batch(
             map_func=map_fn, batch_size=batch_size, drop_remainder=True))
     else:
-        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
+        dataset = dataset.batch(batch_size, drop_remainder=True)
 
     dataset = dataset.prefetch(buffer_size=batch_size * prefetch_buffer_size)
 
