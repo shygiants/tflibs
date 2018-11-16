@@ -8,12 +8,11 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 
-from tflibs.utils import strip_illegal_summary_name
-
 
 # TODO: Universal optimizer
 class Optimizer:
-    def __init__(self, learning_rate, var_scope, beta1, beta2, decay_policy='none', decay_params=None):
+    def __init__(self, learning_rate: float, var_scope: str, optimizer_params=None, decay_policy='none',
+                 decay_params=None):
         if decay_policy == 'none':
             self._learning_rate = learning_rate
         elif decay_policy == 'dying':
@@ -27,7 +26,7 @@ class Optimizer:
 
         tf.summary.scalar(var_scope, self._learning_rate, family='Learning_Rates')
 
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate, beta1=beta1, beta2=beta2)
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate, **(optimizer_params or {}))
         self.var_scope = var_scope
 
         self._var_list = None
@@ -37,17 +36,17 @@ class Optimizer:
         if self._var_list is None:
             self._var_list = tf.trainable_variables('.*' + self.var_scope)
 
-            tf.logging.info('Trainable variables in %s:', self.var_scope)
+            tf.logging.info('Trainable variables in {}:'.format(self.var_scope))
             for var in self._var_list:
-                tf.logging.info('%s', var)
+                tf.logging.info(var)
 
         return self._var_list
 
-    def train_op(self, loss, global_step=None):
-        grads = self.compute_grad(loss)
+    def train_op(self, loss, global_step=None, colocate_gradients_with_ops=True):
+        grads = self.compute_grad(loss, colocate_gradients_with_ops=colocate_gradients_with_ops)
         return self.apply_gradients(grads, global_step=global_step)
 
-    def compute_grad(self, loss):
+    def compute_grad(self, loss, colocate_gradients_with_ops=True):
         """
         Computes gradients of trainable variables with regard to a loss given.
 
@@ -55,7 +54,8 @@ class Optimizer:
         :return: A list of tuples containing gradients and corresponding variables.
         :rtype: list
         """
-        return self.optimizer.compute_gradients(loss, var_list=self.var_list)
+        return self.optimizer.compute_gradients(loss, var_list=self.var_list,
+                                                colocate_gradients_with_ops=colocate_gradients_with_ops)
 
     def apply_gradients(self, grads_and_vars, global_step=None):
         tf.contrib.training.add_gradients_summaries(grads_and_vars)

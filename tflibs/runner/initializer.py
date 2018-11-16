@@ -13,10 +13,10 @@ from tflibs.utils import list_modules, import_module, log_parse_args
 
 
 class BaseInitializer:
-    def add_arguments(self, argparser):
+    def add_arguments(self, argparser: argparse.ArgumentParser):
         raise NotImplementedError
 
-    def handle(self, parse_args, unknown):
+    def handle(self, parse_args: argparse.Namespace, unknown) -> tuple:
         raise NotImplementedError
 
 
@@ -24,7 +24,7 @@ class DatasetInitializer(BaseInitializer):
     def __init__(self, dataset_pkg='datasets.dataset'):
         self._dataset_pkg = dataset_pkg
 
-    def _list_datasets(self):
+    def _list_datasets(self) -> list:
         return list_modules(self._dataset_pkg.replace('.', '/'))
 
     def _dataset_factory(self, name):

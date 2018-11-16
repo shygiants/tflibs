@@ -43,3 +43,9 @@ def concat_images(*list_images):
         list_images = list(map(normalize_images, list_images))
 
         return tf.concat(list_images, 2)
+
+
+def flat_images(images):
+    with tf.name_scope('flat_images', values=[images]):
+        shape = images.shape.as_list()
+        return tf.reshape(images, [shape[0] * shape[1]] + shape[2:])
