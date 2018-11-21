@@ -95,7 +95,7 @@ class ImageSaverHook(tf.train.SessionRunHook):
             images = run_values.results[k]
             encoded = encode(images)
             with open(os.path.join(self.image_dir,
-                                   '{key}_{gs}_{iter}.jpg'.format(
+                                   '{key}_{gs:07d}_{iter:03d}.jpg'.format(
                                        key=k, gs=global_step, iter=self.iter)), 'wb') as f:
                 f.write(encoded)
 
