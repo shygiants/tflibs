@@ -38,8 +38,26 @@ def normalize_images(images):
         return images / tf.reduce_max(images)
 
 
-def concat_images(*list_images):
+def concat_images(*list_images, shape=(1, -1)):
     with tf.name_scope('concat_images', values=list_images):
         list_images = list(map(normalize_images, list_images))
+        num_images = len(list_images)
 
-        return tf.concat(list_images, 2)
+        if shape[0] == -1:
+            assert num_images % shape[1] == 0
+
+            num_rows = num_images / shape[1]
+            num_columns = shape[1]
+
+        elif shape[1] == -1:
+            assert num_images % shape[0] == 0
+
+            num_rows = shape[0]
+            num_columns = num_images / shape[0]
+        else:
+            num_rows = shape[0]
+            num_columns = shape[1]
+
+        rows = list(map(lambda r: tf.concat(list_images[r * num_columns:(r + 1) * num_columns], axis=2),
+                        range(num_rows)))
+        return tf.concat(rows, axis=1)
