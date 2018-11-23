@@ -46,14 +46,14 @@ def concat_images(*list_images, shape=(1, -1)):
         if shape[0] == -1:
             assert num_images % shape[1] == 0
 
-            num_rows = num_images / shape[1]
+            num_rows = num_images // shape[1]
             num_columns = shape[1]
 
         elif shape[1] == -1:
             assert num_images % shape[0] == 0
 
             num_rows = shape[0]
-            num_columns = num_images / shape[0]
+            num_columns = num_images // shape[0]
         else:
             num_rows = shape[0]
             num_columns = shape[1]
