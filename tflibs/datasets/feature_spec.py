@@ -38,6 +38,9 @@ class FeatureSpec:
         :return: A TF-Feature proto.
         :rtype: tf.train.Feature
         """
+        if not isinstance(values, bytes):
+            values = bytes(values, 'utf-8')
+
         return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
     @staticmethod
