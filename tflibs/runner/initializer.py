@@ -168,6 +168,14 @@ class TrainInitializer(ModelInitializer):
                                type=int,
                                default=200000,
                                help='Maximum number of training iterations to perform.')
+        argparser.add_argument('--train-batch-size',
+                               type=int,
+                               default=1,
+                               help='Batch size for training')
+        argparser.add_argument('--eval-batch-size',
+                               type=int,
+                               default=1,
+                               help='Batch size for evaluation')
 
     def handle(self, parse_args, unknown):
         """
@@ -207,12 +215,16 @@ class TrainInitializer(ModelInitializer):
         log_parse_args(eval_args, 'Eval arguments')
 
         train_args = vars(train_args)
-        train_args.update({'train_iters': parse_args.train_iters})
+        train_args.update({'train_iters': parse_args.train_iters,
+                           'train_batch_size': parse_args.train_batch_size})
+
+        eval_args = vars(eval_args)
+        eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
 
         model_params = {
             'model_args': vars(model_args),
             'train_args': train_args,
-            'eval_args': vars(eval_args),
+            'eval_args': eval_args,
         }
 
         save_steps = parse_args.save_steps
@@ -241,7 +253,9 @@ class TrainInitializer(ModelInitializer):
             config=run_config,
             params=model_params)
 
-        return {'estimator': estimator}, unknown
+        return {'estimator': estimator,
+                'train_batch_size': parse_args.train_batch_size,
+                'eval_batch_size': parse_args.eval_batch_size}, unknown
 
 
 class EvalInitializer(ModelInitializer):
@@ -256,6 +270,11 @@ class EvalInitializer(ModelInitializer):
         :param argparse.ArgumentParser argparser: Argument parser used to add arguments.
         """
         ModelInitializer.add_arguments(self, argparser)
+
+        argparser.add_argument('--eval-batch-size',
+                               type=int,
+                               default=1,
+                               help='Batch size for evaluation')
 
     def handle(self, parse_args, unknown):
         """
@@ -287,9 +306,12 @@ class EvalInitializer(ModelInitializer):
         eval_args, unknown = parser.parse_known_args(unknown)
         log_parse_args(eval_args, 'Eval arguments')
 
+        eval_args = vars(eval_args)
+        eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
+
         model_params = {
             'model_args': vars(model_args),
-            'eval_args': vars(eval_args),
+            'eval_args': eval_args,
         }
 
         session_config = tf.ConfigProto(log_device_placement=False,
@@ -303,4 +325,5 @@ class EvalInitializer(ModelInitializer):
             config=run_config,
             params=model_params)
 
-        return {'estimator': estimator}, unknown
+        return {'estimator': estimator,
+                'eval_batch_size': parse_args.eval_batch_size}, unknown
