@@ -29,7 +29,8 @@ class _TensorDescriptor:
                     tf.summary.scalar(self.summary, val)
                 else:
                     tf.summary.histogram(self.summary, val)
-                # TODO: If scalar make scalar summary
+
+                tf.logging.info('Summary {} is defined'.format(self.summary))
 
         setattr(instance, self.name, val)
         return val
@@ -73,6 +74,7 @@ class _ImageDescriptor(_TensorDescriptor):
 
         if instance.model_idx == 0 and self.img_summary is not None:
             image_summary(self.img_summary, val)
+            tf.logging.info('Summary {} is defined at `Images`'.format(self.img_summary))
 
         return val
 
@@ -166,10 +168,17 @@ class Model:
 
     def summary_loss(self):
         losses = tf.losses.get_losses()
+        tf.logging.info('Defining summaries of losses')
         for loss in losses:
             lname = loss.name  # type: str
-            lname = lname.split('/')[-2]
-            tf.summary.scalar(lname, loss, family='Losses')
+            tokens = lname.split('/')
+            while True:
+                token = tokens.pop()
+                token = token.rstrip(':0')
+                if token != 'value':
+                    tf.summary.scalar(token, loss, family='Losses')
+                    tf.logging.info('Summary {} is defined at `Losses`'.format(token))
+                    break
 
     def device_setter(self, device_id: int):
         if device_id is None:
