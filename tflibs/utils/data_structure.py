@@ -60,10 +60,6 @@ def map_dict(map_fn, original_dict):
     return dict(map(lambda item: map_fn(item[0], item[1]), original_dict.items()))
 
 
-def tup_lambda(fn):
-    return lambda tup: fn(*tup)
-
-
 def param_consumer(arg_names, params, unpack=False):
     values = map(lambda n: params.pop(n), arg_names)
     if unpack:

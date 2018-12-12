@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from tflibs.utils import map_dict, tup_lambda
+from tflibs.utils import map_dict, unpack_tuple
 from tflibs.training.optimizer import Optimizer
 
 
@@ -35,10 +35,10 @@ class Dispatcher:
             split_labels = tf.split(labels, num_towers)
             args.append(split_labels)
 
-        self._models = list(map(tup_lambda(lambda i, args: model_cls(*args,
-                                                                     model_idx=i,
-                                                                     model_parallelism=model_parallelism,
-                                                                     **model_param)), enumerate(zip(*args))))
+        self._models = list(map(unpack_tuple(lambda i, args: model_cls(*args,
+                                                                       model_idx=i,
+                                                                       model_parallelism=model_parallelism,
+                                                                       **model_param)), enumerate(zip(*args))))
 
     def minimize(self, optimizer: Optimizer, loss_fn, depends=None, global_step=None, colocate_gradients_with_ops=True):
         """

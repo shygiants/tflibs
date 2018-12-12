@@ -7,6 +7,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+from collections import Iterable
 
 import tensorflow as tf
 
@@ -25,10 +26,19 @@ class _TensorDescriptor:
             val = self.fn(instance)
 
             if instance.model_idx == 0 and self.summary is not None:
-                if val.shape.ndims == 0:
-                    tf.summary.scalar(self.summary, val)
+                def define_summary(summary_name, tensor):
+                    if tensor.shape.ndims == 0:
+                        tf.summary.scalar(summary_name, tensor)
+                    else:
+                        tf.summary.histogram(summary_name, tensor)
+
+                if isinstance(val, tf.Tensor):
+                    define_summary(self.summary, val)
+                elif isinstance(val, Iterable):
+                    for i, t in enumerate(val):
+                        define_summary('{}/{}'.format(self.summary, i), t)
                 else:
-                    tf.summary.histogram(self.summary, val)
+                    raise ValueError('Tensor should be either `tf.Tensor` or iterable of `tf.Tensor`')
 
                 tf.logging.info('Summary {} is defined'.format(self.summary))
 

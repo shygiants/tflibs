@@ -28,3 +28,10 @@ def strip_dict_arg(original_fn):
         return original_fn(**arg)
 
     return wrapper
+
+
+def unpack_tuple(original_fn):
+    def wrapper(tup):
+        return original_fn(*tup)
+
+    return wrapper

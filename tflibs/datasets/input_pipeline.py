@@ -13,14 +13,16 @@ def build_input_fn(dataset,
                    map_fn=None,
                    global_step=None,
                    num_elements=None,
+                   consider_num_elements=True,
                    shuffle_and_repeat=True,
                    shuffle_buffer_size=50,
                    prefetch_buffer_size=20):
-    num_elements = num_elements or _count_dataset(dataset)
-    tf.logging.info('Number of elements in dataset {}: {}'.format(dataset, num_elements))
+    if consider_num_elements:
+        num_elements = num_elements or _count_dataset(dataset)
+        tf.logging.info('Number of elements in dataset {}: {}'.format(dataset, num_elements))
 
-    if global_step:
-        dataset = dataset.skip(((global_step - 1) * batch_size) % num_elements)
+        if global_step:
+            dataset = dataset.skip(((global_step - 1) * batch_size) % num_elements)
 
     if shuffle_and_repeat:
         dataset = dataset.apply(tf.contrib.data.shuffle_and_repeat(batch_size * shuffle_buffer_size))
@@ -41,7 +43,7 @@ def build_input_fn(dataset,
     return input_fn
 
 
-def _count_dataset(dataset):
+def _count_dataset(dataset: tf.data.Dataset):
     iterator = dataset.make_one_shot_iterator()
     elem = iterator.get_next()
 
