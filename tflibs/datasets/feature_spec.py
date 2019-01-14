@@ -81,6 +81,7 @@ class FeatureSpec:
         :return: A dict of `tf.train.Feature`
         :rtype: dict
         """
+
         def map_fn(k, v):
             dtype = v['dtype']
             value = value_dict[k]
@@ -106,6 +107,7 @@ class FeatureSpec:
         :return: A dict of tensors as specified at `feature_proto_spec`
         :rtype: dict
         """
+
         def parse(k, v):
             return '{}/{}'.format(parent_key, k), tf.FixedLenFeature(v['shape'], v['dtype'])
 
@@ -116,6 +118,7 @@ class FeatureSpec:
 class IDSpec(FeatureSpec):
     """A class for specifying unique ID.
     """
+
     def __init__(self):
         FeatureSpec.__init__(self, ())
 
@@ -159,6 +162,7 @@ class ImageSpec(FeatureSpec):
 
     :param list|tuple image_size: The sizes of images
     """
+
     def __init__(self, image_size):
         image_size = list(image_size)
         FeatureSpec.__init__(self, image_size)
@@ -214,6 +218,72 @@ class ImageSpec(FeatureSpec):
         }
 
 
+class VarImageSpec(FeatureSpec):
+    """
+    A class for specifying image spec
+
+    :param list|tuple image_size: The sizes of images
+    """
+
+    def __init__(self, channels):
+        FeatureSpec.__init__(self, ())
+        self._channels = channels
+
+    @property
+    def feature_proto_spec(self):
+        """
+        A property for specifying inner encoding spec of the feature
+
+        :return: The dict containing shape and dtype info
+        :rtype: dict
+        """
+        return {
+            'encoded': {
+                'shape': (),
+                'dtype': tf.string,
+            }
+        }
+
+    @property
+    def channels(self):
+        return self._channels
+
+    def parse(self, parent_key, record):
+        """
+        Parse TF-record and returns `tf.Tensor`
+
+        :param str parent_key: The key of the feature
+        :param tf.Tensor record: String tensor of TF-record
+        :return: A 3-D tensor containing an image
+        :rtype: tf.Tensor
+        """
+        parsed = FeatureSpec.parse(self, parent_key, record)
+        decoded = tf.image.decode_image(parsed['{}/{}'.format(parent_key, 'encoded')], channels=self.channels)
+        decoded.set_shape((None, None, self.channels))
+
+        return decoded
+
+    def create_with_path(self, path):
+        # TODO: Assert shape
+        with open(path, 'rb') as f:
+            return {
+                'encoded': f.read()
+            }
+
+    def create_with_tensor(self, tensor):
+        # TODO: Assert shape
+        return {
+            'encoded': tfimage.encode(tensor)
+        }
+
+    def create_with_contents(self, contents):
+        # TODO: Assert shape
+
+        return {
+            'encoded': contents
+        }
+
+
 class LabelSpec(FeatureSpec):
     """
     A class for specifying one-hot label spec
@@ -221,6 +291,7 @@ class LabelSpec(FeatureSpec):
     :param int depth: The number of labels
     :param list class_names: A list of `str` which describes each labels
     """
+
     def __init__(self, depth, class_names=None):
         FeatureSpec.__init__(self, [depth])
         self._class_names = class_names
@@ -287,6 +358,7 @@ class MultiLabelSpec(FeatureSpec):
     :param int depth: The number of labels
     :param list class_names: A list of `str` which describes each labels
     """
+
     def __init__(self, depth, class_names=None):
         FeatureSpec.__init__(self, [depth])
         self._class_names = class_names

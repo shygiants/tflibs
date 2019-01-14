@@ -5,6 +5,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from tflibs.utils.decorators import unpack_tuple
+
 
 class Attributes:
     def __init__(self, **attrs):
@@ -57,7 +59,11 @@ def _nested_dict_item_gen(nested_dict):
 
 
 def map_dict(map_fn, original_dict):
-    return dict(map(lambda item: map_fn(item[0], item[1]), original_dict.items()))
+    return dict(map(unpack_tuple(map_fn), original_dict.items()))
+
+
+def filter_dict(fn, dic: dict):
+    return dict(filter(unpack_tuple(fn), dic.items()))
 
 
 def param_consumer(arg_names, params, unpack=False):

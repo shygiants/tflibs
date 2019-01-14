@@ -166,6 +166,7 @@ def residual_block(inputs,
                    norm_fn=Norm.Instance,
                    non_linear_fn=Nonlinear.ReLU,
                    use_bias=True,
+                   scale=1.0,
                    scope=None,
                    reuse=None):
     with tf.variable_scope(scope, 'Residual_Block', values=[inputs], reuse=reuse):
@@ -175,7 +176,7 @@ def residual_block(inputs,
         inputs = conv2d(inputs, num_filters, 3,
                         padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=Nonlinear.NONE, use_bias=use_bias)
 
-        return inputs + shortcut
+        return scale * inputs + shortcut
 
 
 def linear(inputs,

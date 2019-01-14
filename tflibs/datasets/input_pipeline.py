@@ -15,6 +15,7 @@ def build_input_fn(dataset,
                    num_elements=None,
                    consider_num_elements=True,
                    shuffle_and_repeat=True,
+                   num_parallel_batches=1,
                    shuffle_buffer_size=50,
                    prefetch_buffer_size=20):
     if consider_num_elements:
@@ -25,11 +26,11 @@ def build_input_fn(dataset,
             dataset = dataset.skip(((global_step - 1) * batch_size) % num_elements)
 
     if shuffle_and_repeat:
-        dataset = dataset.apply(tf.contrib.data.shuffle_and_repeat(batch_size * shuffle_buffer_size))
+        dataset = dataset.apply(tf.data.experimental.shuffle_and_repeat(batch_size * shuffle_buffer_size))
 
     if map_fn is not None:
-        dataset = dataset.apply(tf.contrib.data.map_and_batch(
-            map_func=map_fn, batch_size=batch_size, drop_remainder=True))
+        dataset = dataset.apply(tf.data.experimental.map_and_batch(map_fn, batch_size, drop_remainder=True,
+                                                                   num_parallel_batches=num_parallel_batches))
     else:
         dataset = dataset.batch(batch_size, drop_remainder=True)
 

@@ -201,7 +201,7 @@ class BaseDataset:
             thread = threading.Thread(target=process_wrapper, kwargs=kwargs)
             thread.start()
 
-    def read(self, split=None):
+    def read(self, split=None, num_parallel_calls=16):
         """
         Reads tfrecord and makes it tf.data.Dataset
 
@@ -224,6 +224,6 @@ class BaseDataset:
         tf.logging.info('Number of TFRecord files: {}'.format(len(tf.gfile.Glob(tfrecord_filepattern))))
 
         dataset = tf.data.TFRecordDataset(tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False))
-        dataset = dataset.map(parse)
+        dataset = dataset.map(parse, num_parallel_calls=num_parallel_calls)
 
         return dataset
