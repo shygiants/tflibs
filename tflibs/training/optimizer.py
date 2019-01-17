@@ -7,6 +7,9 @@ from __future__ import print_function
 
 import tensorflow as tf
 import numpy as np
+import functools
+
+from tflibs.utils import unpack_tuple
 
 
 # TODO: Universal optimizer
@@ -78,23 +81,23 @@ class Optimizer:
         if len(tower_grads) == 1:
             return tower_grads[0]
 
-        def filter_no_gradients(grad_and_vars):
-            return not any(map(lambda gv: gv[0] is None, grad_and_vars))
+        num_towers = len(tower_grads)
 
-        def reduce_gradients(grad_and_vars):
-            # Note that each grad_and_vars looks like the following:
-            #   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))
-            grads = list(map(lambda gv: gv[0], grad_and_vars))
+        @unpack_tuple
+        def filter_no_gradients(g, _):
+            return g is not None
 
-            # Get average gradients
-            grads = tf.stack(grads)
-            grad = tf.reduce_mean(grads, axis=0)
+        @unpack_tuple
+        def reduce_gradients(grad, var):
+            with tf.device(grad.device):
+                grad = grad / float(num_towers)
 
-            # Get chief variable
-            var = grad_and_vars[0][1]
             return grad, var
 
-        return list(map(reduce_gradients, filter(filter_no_gradients, zip(*tower_grads))))
+        gvs = functools.reduce(lambda a, b: a + b, tower_grads, [])
+        gvs = list(filter(filter_no_gradients, gvs))
+
+        return list(map(reduce_gradients, gvs))
 
     @staticmethod
     def dying_decay(starter_learning_rate, train_iters, decay_iters, decay_steps):
