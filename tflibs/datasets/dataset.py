@@ -218,7 +218,11 @@ class BaseDataset:
         tfrecord_filepattern = os.path.join(self._dataset_dir, fname_pattern.format(**kwargs))
 
         tf.logging.info('TFRecord file pattern: {}'.format(tfrecord_filepattern))
-        tf.logging.info('Number of TFRecord files: {}'.format(len(tf.gfile.Glob(tfrecord_filepattern))))
+        num_files = len(tf.gfile.Glob(tfrecord_filepattern))
+        tf.logging.info('Number of TFRecord files: {}'.format(num_files))
+
+        if num_files == 0:
+            raise FileNotFoundError('There is not file named {}'.format(tfrecord_filepattern))
 
         dataset = tf.data.TFRecordDataset(tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False))
         dataset = dataset.map(parse, num_parallel_calls=num_parallel_calls)
