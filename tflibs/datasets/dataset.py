@@ -93,6 +93,7 @@ class BaseDataset:
 
     :param str dataset_dir: A directory where tfrecord files are stored
     """
+
     def __init__(self, dataset_dir):
         self._dataset_dir = dataset_dir
 
@@ -134,7 +135,7 @@ class BaseDataset:
         """
         pass
 
-    def write(self, collection, process_fn, num_parallel_calls=16, test_size=None):
+    def write(self, collection, process_fn, split=None, num_parallel_calls=16):
         """
         Writes examples on tfrecord files
 
@@ -143,37 +144,32 @@ class BaseDataset:
         :param int num_parallel_calls:
         :param int test_size:
         """
-        def process_wrapper(coll, thread_idx, test_size):
+
+        def process_wrapper(coll, thread_idx):
             # Make tfrecord writer
             fname, ext = os.path.splitext(self.tfrecord_filename)
             fname_pattern = '{fname}{split}{thread_idx:03d}-of-{num_threads:03d}{ext}'
             kwargs = {
                 'fname': fname,
-                'split': '_{split}_' if test_size is not None else '_',
+                'split': '_{split}_' if split is not None else '_',
                 'thread_idx': thread_idx,
                 'num_threads': num_parallel_calls,
                 'ext': ext
             }
             tfrecord_filepattern = os.path.join(self._dataset_dir, fname_pattern.format(**kwargs))
 
-            if test_size is not None:
-                train_writer = tf.python_io.TFRecordWriter(tfrecord_filepattern.format(split='train'))
-                test_writer = tf.python_io.TFRecordWriter(tfrecord_filepattern.format(split='test'))
-
-                get_writer = lambda i: test_writer if i < test_size else train_writer
+            if split is not None:
+                writer = tf.python_io.TFRecordWriter(tfrecord_filepattern.format(split=split))
             else:
-                writer = tf.python_io.TFRecordWriter(os.path.join(self._dataset_dir, tfrecord_filepattern))
-                get_writer = lambda _: writer
+                writer = tf.python_io.TFRecordWriter(tfrecord_filepattern)
 
             for i, elem in tqdm(enumerate(coll), total=len(coll), position=thread_idx):
                 # Process
-                processed = process_fn(elem, self.feature_specs, None if test_size is None else i < test_size)
+                processed = process_fn(elem, self.feature_specs)
                 if processed is None:
                     continue
 
                 # Write
-                writer = get_writer(i)
-
                 if not isinstance(processed, list):
                     processed = [processed]
 
@@ -195,7 +191,6 @@ class BaseDataset:
 
         for i, rng in enumerate(ranges):
             kwargs = {'coll': collection[rng[0]:rng[1]],
-                      'test_size': test_size // num_parallel_calls if test_size is not None else None,
                       'thread_idx': i}
 
             thread = threading.Thread(target=process_wrapper, kwargs=kwargs)
@@ -205,9 +200,11 @@ class BaseDataset:
         """
         Reads tfrecord and makes it tf.data.Dataset
 
-        :param split: Split name (train or test)
+        :param split:
+        :param num_parallel_calls:
         :return: A dataset
         """
+
         def parse(record):
             return map_dict(lambda k, v: (k, v.parse(k, record)), self.feature_specs)
 
