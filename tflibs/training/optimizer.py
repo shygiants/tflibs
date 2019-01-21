@@ -5,13 +5,30 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from enum import Enum
+
 import tensorflow as tf
 import numpy as np
 
 
+class Optimizers(Enum):
+    Adam = 'adam'
+    AdaGrad = 'adagrad'
+
+    @classmethod
+    def get(cls, name):
+        if name == cls.Adam.value:
+            return tf.train.AdamOptimizer
+        elif name == cls.AdaGrad.value:
+            return tf.train.AdagradOptimizer
+        else:
+            raise ValueError()
+
+
 # TODO: Universal optimizer
 class Optimizer:
-    def __init__(self, learning_rate: float, var_scope: str, optimizer_params=None, decay_policy='none',
+    def __init__(self, learning_rate: float, var_scope: str, optimizer=Optimizers.Adam, optimizer_params=None,
+                 decay_policy='none',
                  decay_params=None):
         if decay_policy == 'none':
             self._learning_rate = learning_rate
@@ -26,7 +43,9 @@ class Optimizer:
 
         tf.summary.scalar(var_scope, self._learning_rate, family='Learning_Rates')
 
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate, **(optimizer_params or {}))
+        optimizer_fn = Optimizers.get(optimizer.value) if not callable(optimizer) else optimizer
+
+        self.optimizer = optimizer_fn(learning_rate=learning_rate, **(optimizer_params or {}))
         self.var_scope = var_scope
 
         self._var_list = None

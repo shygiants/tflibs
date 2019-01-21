@@ -106,6 +106,9 @@ class ModelInitializer(BaseInitializer):
                                required=True,
                                help='The name of the model to use.',
                                choices=self._list_models())
+        argparser.add_argument('--allow-soft-placement',
+                               action='store_true',
+                               help='The name of the model to use.')
 
     def handle(self, parse_args, unknown):
         """
@@ -119,12 +122,15 @@ class ModelInitializer(BaseInitializer):
         :rtype: tuple
         """
         model_name = parse_args.model_name
+        allow_soft_placement = parse_args.allow_soft_placement
 
         del parse_args.model_name
+        del parse_args.allow_soft_placement
 
         model_cls = self._model_factory(model_name)
 
-        return {'model_cls': model_cls}, unknown
+        return {'model_cls': model_cls,
+                'allow_soft_placement': allow_soft_placement}, unknown
 
 
 class TrainInitializer(ModelInitializer):
@@ -195,6 +201,7 @@ class TrainInitializer(ModelInitializer):
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
         model_cls = handled_args['model_cls']
+        allow_soft_placement = handled_args['allow_soft_placement']
 
         # Parse model-specific arguments
         parser = argparse.ArgumentParser()
@@ -238,7 +245,7 @@ class TrainInitializer(ModelInitializer):
         del parse_args.random_seed
 
         session_config = tf.ConfigProto(log_device_placement=False,
-                                        allow_soft_placement=False)
+                                        allow_soft_placement=allow_soft_placement)
 
         run_config = tf.estimator.RunConfig().replace(session_config=session_config,
                                                       save_summary_steps=save_steps,

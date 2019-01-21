@@ -191,10 +191,13 @@ class Model:
                     break
 
     def device_setter(self, device_id: int):
-        if device_id is None:
-            return None
-        gpu_id = self.device or (
-            self.num_devices() * self.model_idx + device_id if self.model_parallelism else self.model_idx)
+        if self.model_parallelism:
+            if device_id is None:
+                return None
+            gpu_id = self.device or self.num_devices() * self.model_idx + device_id
+        else:
+            gpu_id = self.device or self.model_idx
+
         return device_setter('/gpu:{}'.format(gpu_id))
 
 
