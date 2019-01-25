@@ -129,8 +129,15 @@ class ModelInitializer(BaseInitializer):
 
         model_cls = self._model_factory(model_name)
 
+        # Parse model-specific arguments
+        parser = argparse.ArgumentParser()
+        model_cls.add_model_args(parser, parse_args)
+        model_args, unknown = parser.parse_known_args(unknown)
+        log_parse_args(model_args, 'Model arguments')
+
         return {'model_cls': model_cls,
-                'allow_soft_placement': allow_soft_placement}, unknown
+                'allow_soft_placement': allow_soft_placement,
+                'model_args': vars(model_args)}, unknown
 
 
 class TrainInitializer(ModelInitializer):
@@ -202,12 +209,7 @@ class TrainInitializer(ModelInitializer):
 
         model_cls = handled_args['model_cls']
         allow_soft_placement = handled_args['allow_soft_placement']
-
-        # Parse model-specific arguments
-        parser = argparse.ArgumentParser()
-        model_cls.add_model_args(parser, parse_args)
-        model_args, unknown = parser.parse_known_args(unknown)
-        log_parse_args(model_args, 'Model arguments')
+        model_args = handled_args['model_args']
 
         # Parse model-specific train arguments
         parser = argparse.ArgumentParser()
@@ -229,7 +231,7 @@ class TrainInitializer(ModelInitializer):
         eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
 
         model_params = {
-            'model_args': vars(model_args),
+            'model_args': model_args,
             'train_args': train_args,
             'eval_args': eval_args,
         }
