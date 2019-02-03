@@ -264,7 +264,8 @@ class TrainInitializer(ModelInitializer):
 
         return {'estimator': estimator,
                 'train_batch_size': parse_args.train_batch_size,
-                'eval_batch_size': parse_args.eval_batch_size}, unknown
+                'eval_batch_size': parse_args.eval_batch_size,
+                'model_cls': model_cls}, unknown
 
 
 class EvalInitializer(ModelInitializer):
@@ -335,4 +336,5 @@ class EvalInitializer(ModelInitializer):
             params=model_params)
 
         return {'estimator': estimator,
-                'eval_batch_size': parse_args.eval_batch_size}, unknown
+                'eval_batch_size': parse_args.eval_batch_size,
+                'model_cls': model_cls}, unknown
