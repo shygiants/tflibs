@@ -14,6 +14,7 @@ import numpy as np
 class Optimizers(Enum):
     Adam = 'adam'
     AdaGrad = 'adagrad'
+    Momentum = 'momentum'
 
     @classmethod
     def get(cls, name):
@@ -21,6 +22,8 @@ class Optimizers(Enum):
             return tf.train.AdamOptimizer
         elif name == cls.AdaGrad.value:
             return tf.train.AdagradOptimizer
+        elif name == cls.Momentum.value:
+            return tf.train.MomentumOptimizer
         else:
             raise ValueError()
 
