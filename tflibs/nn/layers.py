@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
+
 import tensorflow as tf
 
 
@@ -31,9 +33,18 @@ class Norm:
             raise ValueError()
 
 
+def prelu(inputs):
+    with tf.variable_scope(None, default_name='PReLU', values=[inputs]):
+        alpha = tf.get_variable('alpha', shape=(), dtype=tf.float32, initializer=tf.initializers.constant())
+        inputs = tf.nn.leaky_relu(inputs, alpha=alpha)
+
+        return inputs
+
+
 class Nonlinear:
     ReLU = 'ReLU'
     LeakyReLU = 'LeakyReLU'
+    PReLU = 'PReLU'
     Sigmoid = 'Sigmoid'
     Tanh = 'Tanh'
     NONE = None
@@ -44,6 +55,8 @@ class Nonlinear:
             return tf.nn.relu
         elif name == cls.LeakyReLU:
             return tf.nn.leaky_relu
+        elif name == cls.PReLU:
+            return prelu
         elif name == cls.Sigmoid:
             return tf.nn.sigmoid
         elif name == cls.Tanh:
