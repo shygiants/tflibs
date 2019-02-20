@@ -32,7 +32,7 @@ class Optimizers(Enum):
 class Optimizer:
     def __init__(self, learning_rate: float, var_scope: str, optimizer=Optimizers.Adam, optimizer_params=None,
                  decay_policy='none',
-                 decay_params=None):
+                 decay_params=None, summary_gradients=False):
         if decay_policy == 'none':
             self._learning_rate = learning_rate
         elif decay_policy == 'dying':
@@ -51,7 +51,13 @@ class Optimizer:
         self.optimizer = optimizer_fn(learning_rate=learning_rate, **(optimizer_params or {}))
         self.var_scope = var_scope
 
+        self._summary_gradients = summary_gradients
+
         self._var_list = None
+
+    @property
+    def summary_gradients(self):
+        return self._summary_gradients
 
     @property
     def var_list(self):
@@ -80,7 +86,8 @@ class Optimizer:
                                                 colocate_gradients_with_ops=colocate_gradients_with_ops)
 
     def apply_gradients(self, grads_and_vars, global_step=None):
-        tf.contrib.training.add_gradients_summaries(grads_and_vars)
+        if self.summary_gradients:
+            tf.contrib.training.add_gradients_summaries(grads_and_vars)
         return self.optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
     def apply_tower_gradients(self, tower_grads, global_step=None):
