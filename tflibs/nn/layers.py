@@ -132,8 +132,8 @@ def deconv2d(inputs,
                            values=[inputs], reuse=reuse):
         if method == DeconvMethod.NNConv:
             if strides > 1:
-                shape = inputs.shape.as_list()[1:3]
-                inputs = tf.image.resize_nearest_neighbor(inputs, list(map(lambda e: e * strides, shape)))
+                shape = tf.shape(inputs)[1:3]
+                inputs = tf.image.resize_nearest_neighbor(inputs, shape * strides)
 
             # Conv
             inputs = conv2d(inputs,
