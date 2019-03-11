@@ -176,6 +176,10 @@ class Model:
     def add_eval_args(cls, argparser: argparse.ArgumentParser, parse_args: argparse.Namespace):
         pass
 
+    @classmethod
+    def make_map_fn(cls, mode, **hparams):
+        raise NotImplementedError
+
     def summary_loss(self):
         losses = tf.losses.get_losses()
         tf.logging.info('Defining summaries of losses')

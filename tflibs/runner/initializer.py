@@ -10,6 +10,7 @@ import argparse
 import tensorflow as tf
 
 from tflibs.utils import list_modules, import_module, log_parse_args
+from tflibs.model import Model
 
 
 class BaseInitializer:
@@ -207,7 +208,7 @@ class TrainInitializer(ModelInitializer):
         """
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
-        model_cls = handled_args['model_cls']
+        model_cls = handled_args['model_cls']  # type: Model
         allow_soft_placement = handled_args['allow_soft_placement']
         model_args = handled_args['model_args']
 
@@ -265,7 +266,9 @@ class TrainInitializer(ModelInitializer):
         return {'estimator': estimator,
                 'train_batch_size': parse_args.train_batch_size,
                 'eval_batch_size': parse_args.eval_batch_size,
-                'model_cls': model_cls}, unknown
+                'model_cls': model_cls,
+                'train_map_fn': model_cls.make_map_fn('train', **model_args),
+                'eval_map_fn': model_cls.make_map_fn('eval', **model_args)}, unknown
 
 
 class EvalInitializer(ModelInitializer):
@@ -337,4 +340,5 @@ class EvalInitializer(ModelInitializer):
 
         return {'estimator': estimator,
                 'eval_batch_size': parse_args.eval_batch_size,
-                'model_cls': model_cls}, unknown
+                'model_cls': model_cls,
+                'eval_map_fn': model_cls.make_map_fn('eval', **vars(model_args))}, unknown

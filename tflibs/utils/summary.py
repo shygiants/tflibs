@@ -22,5 +22,8 @@ def histogram_trainable_vars():
 
 
 def image_summary(name, image):
-    batch_size = image.shape.as_list()[0]
+    try:
+        batch_size = image.shape.as_list()[0]
+    except ValueError:
+        batch_size = 12
     tf.summary.image(name, image, max_outputs=batch_size, family='Images')
