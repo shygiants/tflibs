@@ -15,6 +15,7 @@ class Optimizers(Enum):
     Adam = 'adam'
     AdaGrad = 'adagrad'
     Momentum = 'momentum'
+    SGD = 'sgd'
 
     @classmethod
     def get(cls, name):
@@ -24,6 +25,8 @@ class Optimizers(Enum):
             return tf.train.AdagradOptimizer
         elif name == cls.Momentum.value:
             return tf.train.MomentumOptimizer
+        elif name == cls.SGD.value:
+            return tf.train.GradientDescentOptimizer
         else:
             raise ValueError()
 
