@@ -35,7 +35,7 @@ class Optimizers(Enum):
 class Optimizer:
     def __init__(self, learning_rate: float, var_scope: str, optimizer=Optimizers.Adam, optimizer_params=None,
                  decay_policy='none',
-                 decay_params=None, summary_gradients=False):
+                 decay_params=None, summary_gradients=False, clip_gradient=0.):
         if decay_policy == 'none':
             self._learning_rate = learning_rate
         elif decay_policy == 'dying':
@@ -55,6 +55,7 @@ class Optimizer:
         self.var_scope = var_scope
 
         self._summary_gradients = summary_gradients
+        self._clip_gradient = clip_gradient
 
         self._var_list = None
 
@@ -102,6 +103,10 @@ class Optimizer:
         :rtype: tf.Operation
         """
         avg_grad = self._average_gradients(tower_grads)
+        if self._clip_gradient > 0.:
+            avg_grad = [(tf.clip_by_value(grad, -self._clip_gradient, self._clip_gradient), var)
+                        for grad, var in avg_grad]
+
         apply_grad_op = self.apply_gradients(avg_grad, global_step=global_step)
         return apply_grad_op
 
