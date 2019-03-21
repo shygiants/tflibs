@@ -104,7 +104,10 @@ class Optimizer:
         """
         avg_grad = self._average_gradients(tower_grads)
         if self._clip_gradient > 0.:
-            avg_grad = [(tf.clip_by_value(grad, -self._clip_gradient, self._clip_gradient), var)
+            grads = [tf.reduce_any(tf.greater(tf.abs(grad), self._clip_gradient)) for grad, var in avg_grad]
+            skip = tf.reduce_any(tf.convert_to_tensor(grads))
+
+            avg_grad = [(tf.cond(skip, true_fn=lambda: tf.zeros_like(grad), false_fn=lambda: grad), var)
                         for grad, var in avg_grad]
 
         apply_grad_op = self.apply_gradients(avg_grad, global_step=global_step)
