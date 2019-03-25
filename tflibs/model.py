@@ -102,7 +102,7 @@ class _LossDescriptor(_TensorDescriptor):
     def __get__(self, instance, owner):
         val = _TensorDescriptor.__get__(self, instance, owner)
 
-        if val not in tf.losses.get_losses():
+        if instance.model_idx == 0 and val not in tf.losses.get_losses():
             val = tf.identity(val, name='{}/value'.format(self.loss_summary))
             tf.losses.add_loss(val)
 
