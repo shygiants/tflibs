@@ -6,7 +6,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
+
 import tensorflow as tf
+import cv2
 
 
 def normalize(images):
@@ -61,3 +64,29 @@ def concat_images(*list_images, shape=(1, -1)):
         rows = list(map(lambda r: tf.concat(list_images[r * num_columns:(r + 1) * num_columns], axis=2),
                         range(num_rows)))
         return tf.concat(rows, axis=1)
+
+
+def rgb2ycrcb(inputs: tf.Tensor):
+    with tf.name_scope('rgb2ycrcb'):
+        ycrcb = tf.py_func(functools.partial(cv2.cvtColor, code=cv2.COLOR_RGB2YCrCb),
+                           [inputs],
+                           tf.uint8)
+        ycrcb.set_shape((None, None, 3))
+
+        return ycrcb
+
+
+def random_crop_op(from_size: tf.Tensor, crop_size: tf.Tensor):
+    with tf.name_scope('random_crop'):
+        sample_space = from_size - crop_size
+
+        sampled_height = tf.random_uniform((), maxval=sample_space[0], dtype=tf.int32)
+        sampled_width = tf.random_uniform((), maxval=sample_space[1], dtype=tf.int32)
+
+        def random_crop(inputs: tf.Tensor, scale: tf.Tensor = 1):
+            offset = (sampled_height * scale, sampled_width * scale)
+            target = (crop_size * scale, crop_size * scale)
+
+            return tf.image.crop_to_bounding_box(inputs, *offset, *target)
+
+        return random_crop

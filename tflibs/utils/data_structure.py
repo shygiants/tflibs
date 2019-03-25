@@ -5,6 +5,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
+
 from tflibs.utils.decorators import unpack_tuple
 
 
@@ -72,3 +74,10 @@ def param_consumer(arg_names, params, unpack=False):
         return list(values)
     else:
         return dict(zip(arg_names, values))
+
+
+def compose_funcs(*funcs):
+    def compose(f, g):
+        return lambda x: f(g(x))
+
+    return functools.reduce(compose, funcs, lambda x: x)

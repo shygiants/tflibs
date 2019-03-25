@@ -78,6 +78,7 @@ from __future__ import print_function
 
 import os
 import threading
+import argparse
 
 import tensorflow as tf
 import numpy as np
@@ -125,7 +126,7 @@ class BaseDataset:
         raise NotImplementedError
 
     @classmethod
-    def add_arguments(cls, parser):
+    def add_arguments(cls, parser: argparse.ArgumentParser):
         """
         Adds arguments.
 
@@ -135,7 +136,7 @@ class BaseDataset:
         """
         pass
 
-    def write(self, collection, process_fn, split=None, num_parallel_calls=16):
+    def write(self, collection: list, process_fn, split=None, num_parallel_calls=16):
         """
         Writes examples on tfrecord files
 
