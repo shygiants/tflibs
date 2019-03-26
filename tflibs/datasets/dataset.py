@@ -225,7 +225,9 @@ class BaseDataset:
         if num_files == 0:
             raise FileNotFoundError('There is not file named {}'.format(tfrecord_filepattern))
 
-        dataset = tf.data.TFRecordDataset(tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False))
+        files = tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False)
+        dataset = files.apply(tf.data.experimental.parallel_interleave(
+            tf.data.TFRecordDataset, cycle_length=num_parallel_calls))
         dataset = dataset.map(parse, num_parallel_calls=num_parallel_calls)
 
         return dataset
