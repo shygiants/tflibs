@@ -197,7 +197,7 @@ class BaseDataset:
             thread = threading.Thread(target=process_wrapper, kwargs=kwargs)
             thread.start()
 
-    def read(self, split=None, num_parallel_calls=16):
+    def read(self, split=None, num_parallel_reads=16, num_parallel_calls=16):
         """
         Reads tfrecord and makes it tf.data.Dataset
 
@@ -226,8 +226,13 @@ class BaseDataset:
             raise FileNotFoundError('There is not file named {}'.format(tfrecord_filepattern))
 
         files = tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False)
+
+        num_parallel_calls = num_parallel_calls // num_parallel_reads
+        num_parallel_calls += 1 if num_parallel_calls % num_parallel_reads != 0 else 0
+
         dataset = files.apply(tf.data.experimental.parallel_interleave(
-            tf.data.TFRecordDataset, cycle_length=num_parallel_calls))
-        dataset = dataset.map(parse, num_parallel_calls=num_parallel_calls)
+            lambda f: tf.data.TFRecordDataset(f).map(parse,
+                                                     num_parallel_calls=num_parallel_calls),
+            cycle_length=num_parallel_reads))
 
         return dataset

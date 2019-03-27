@@ -13,7 +13,7 @@ from tflibs.utils import compose_funcs
 from tflibs.ops import randomly_pick_op
 
 
-def build_input_fn(dataset,
+def build_input_fn(dataset,  # type: tf.data.Dataset
                    batch_size,
                    map_fn=None,
                    global_step=None,
@@ -39,7 +39,7 @@ def build_input_fn(dataset,
     else:
         dataset = dataset.batch(batch_size, drop_remainder=True)
 
-    dataset = dataset.prefetch(buffer_size=batch_size * prefetch_buffer_size)
+    dataset = dataset.prefetch(buffer_size=prefetch_buffer_size)
 
     def input_fn():
         iterator = dataset.make_one_shot_iterator()
