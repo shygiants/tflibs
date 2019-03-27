@@ -206,33 +206,36 @@ class BaseDataset:
         :return: A dataset
         """
 
-        def parse(record):
-            return map_dict(lambda k, v: (k, v.parse(k, record)), self.feature_specs)
+        def dataset_fn():
+            def parse(record):
+                return map_dict(lambda k, v: (k, v.parse(k, record)), self.feature_specs)
 
-        fname, ext = os.path.splitext(self.tfrecord_filename)
-        fname_pattern = '{fname}{split}*{ext}'
-        kwargs = {
-            'fname': fname,
-            'split': '_{split}_'.format(split=split) if split is not None else '_',
-            'ext': ext
-        }
-        tfrecord_filepattern = os.path.join(self._dataset_dir, fname_pattern.format(**kwargs))
+            fname, ext = os.path.splitext(self.tfrecord_filename)
+            fname_pattern = '{fname}{split}*{ext}'
+            kwargs = {
+                'fname': fname,
+                'split': '_{split}_'.format(split=split) if split is not None else '_',
+                'ext': ext
+            }
+            tfrecord_filepattern = os.path.join(self._dataset_dir, fname_pattern.format(**kwargs))
 
-        tf.logging.info('TFRecord file pattern: {}'.format(tfrecord_filepattern))
-        num_files = len(tf.gfile.Glob(tfrecord_filepattern))
-        tf.logging.info('Number of TFRecord files: {}'.format(num_files))
+            tf.logging.info('TFRecord file pattern: {}'.format(tfrecord_filepattern))
+            num_files = len(tf.gfile.Glob(tfrecord_filepattern))
+            tf.logging.info('Number of TFRecord files: {}'.format(num_files))
 
-        if num_files == 0:
-            raise FileNotFoundError('There is not file named {}'.format(tfrecord_filepattern))
+            if num_files == 0:
+                raise FileNotFoundError('There is not file named {}'.format(tfrecord_filepattern))
 
-        files = tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False)
+            files = tf.data.Dataset.list_files(tfrecord_filepattern, shuffle=False)
 
-        num_parallel_calls = num_parallel_calls // num_parallel_reads
-        num_parallel_calls += 1 if num_parallel_calls % num_parallel_reads != 0 else 0
+            num_parallel_calls_per_read = num_parallel_calls // num_parallel_reads
+            num_parallel_calls_per_read += 1 if num_parallel_calls % num_parallel_reads != 0 else 0
 
-        dataset = files.apply(tf.data.experimental.parallel_interleave(
-            lambda f: tf.data.TFRecordDataset(f).map(parse,
-                                                     num_parallel_calls=num_parallel_calls),
-            cycle_length=num_parallel_reads))
+            dataset = files.apply(tf.data.experimental.parallel_interleave(
+                lambda f: tf.data.TFRecordDataset(f).map(parse,
+                                                         num_parallel_calls=num_parallel_calls_per_read),
+                cycle_length=num_parallel_reads))
 
-        return dataset
+            return dataset
+
+        return dataset_fn

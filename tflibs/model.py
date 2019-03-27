@@ -11,36 +11,34 @@ from collections import Iterable
 
 import tensorflow as tf
 
-from tflibs.utils import Attributes, device_setter, image_summary
+from tflibs.utils import Attributes, image_summary
 
 
 class _TensorDescriptor:
-    def __init__(self, fn=None, device=None, summary=None):
-        self._device = device
+    def __init__(self, fn=None, summary=None):
         self._summary = summary
 
         self.fn = fn
 
     def __get__(self, instance, owner):
-        with tf.device(instance.device_setter(self.device)):
-            val = self.fn(instance)
+        val = self.fn(instance)
 
-            if instance.model_idx == 0 and self.summary is not None:
-                def define_summary(summary_name, tensor):
-                    if tensor.shape.ndims == 0:
-                        tf.summary.scalar(summary_name, tensor)
-                    else:
-                        tf.summary.histogram(summary_name, tensor)
-
-                if isinstance(val, tf.Tensor):
-                    define_summary(self.summary, val)
-                elif isinstance(val, Iterable):
-                    for i, t in enumerate(val):
-                        define_summary('{}/{}'.format(self.summary, i), t)
+        if self.summary is not None:
+            def define_summary(summary_name, tensor):
+                if tensor.shape.ndims == 0:
+                    tf.summary.scalar(summary_name, tensor)
                 else:
-                    raise ValueError('Tensor should be either `tf.Tensor` or iterable of `tf.Tensor`')
+                    tf.summary.histogram(summary_name, tensor)
 
-                tf.logging.info('Summary {} is defined'.format(self.summary))
+            if isinstance(val, tf.Tensor):
+                define_summary(self.summary, val)
+            elif isinstance(val, Iterable):
+                for i, t in enumerate(val):
+                    define_summary('{}/{}'.format(self.summary, i), t)
+            else:
+                raise ValueError('Tensor should be either `tf.Tensor` or iterable of `tf.Tensor`')
+
+            tf.logging.info('Summary {} is defined'.format(self.summary))
 
         setattr(instance, self.name, val)
         return val
@@ -49,10 +47,6 @@ class _TensorDescriptor:
         self.fn = fn
 
         return self
-
-    @property
-    def device(self):
-        return self._device
 
     @property
     def summary(self):
@@ -74,15 +68,15 @@ class _TensorDescriptor:
 
 
 class _ImageDescriptor(_TensorDescriptor):
-    def __init__(self, fn=None, device=None, summary=None):
-        _TensorDescriptor.__init__(self, fn=fn, device=device, summary=None)
+    def __init__(self, fn=None, summary=None):
+        _TensorDescriptor.__init__(self, fn=fn, summary=None)
 
         self._img_summary = summary
 
     def __get__(self, instance, owner):
         val = _TensorDescriptor.__get__(self, instance, owner)
 
-        if instance.model_idx == 0 and self.img_summary is not None:
+        if self.img_summary is not None:
             image_summary(self.img_summary, val)
             tf.logging.info('Summary {} is defined at `Images`'.format(self.img_summary))
 
@@ -94,15 +88,15 @@ class _ImageDescriptor(_TensorDescriptor):
 
 
 class _LossDescriptor(_TensorDescriptor):
-    def __init__(self, fn=None, device=None, summary=None):
-        _TensorDescriptor.__init__(self, fn=fn, device=device, summary=None)
+    def __init__(self, fn=None, summary=None):
+        _TensorDescriptor.__init__(self, fn=fn, summary=None)
 
         self._loss_summary = summary
 
     def __get__(self, instance, owner):
         val = _TensorDescriptor.__get__(self, instance, owner)
 
-        if instance.model_idx == 0 and val not in tf.losses.get_losses():
+        if val not in tf.losses.get_losses():
             val = tf.identity(val, name='{}/value'.format(self.loss_summary))
             tf.losses.add_loss(val)
 
@@ -118,12 +112,9 @@ class Model:
     image = _ImageDescriptor
     loss = _LossDescriptor
 
-    def __init__(self, features: dict, labels=None, model_idx=0, model_parallelism=True, device=None, **hparams):
+    def __init__(self, features: dict, labels=None, **hparams):
         self._features = features
         self._labels = labels
-        self._model_idx = model_idx
-        self._model_parallelism = model_parallelism
-        self._device = device
 
         self._hparams = Attributes(**hparams)
         self._networks = Attributes()
@@ -137,18 +128,6 @@ class Model:
         return self._labels
 
     @property
-    def model_idx(self):
-        return self._model_idx
-
-    @property
-    def model_parallelism(self):
-        return self._model_parallelism
-
-    @property
-    def device(self):
-        return self._device
-
-    @property
     def hparams(self):
         return self._hparams
 
@@ -158,10 +137,6 @@ class Model:
 
     @staticmethod
     def model_fn(features, labels, mode, params):
-        raise NotImplementedError
-
-    @classmethod
-    def num_devices(cls):
         raise NotImplementedError
 
     @classmethod
@@ -193,16 +168,6 @@ class Model:
                     tf.summary.scalar(token, loss, family='Losses')
                     tf.logging.info('Summary {} is defined at `Losses`'.format(token))
                     break
-
-    def device_setter(self, device_id: int):
-        if self.model_parallelism:
-            if device_id is None:
-                return None
-            gpu_id = self.device or self.num_devices() * self.model_idx + device_id
-        else:
-            gpu_id = self.device or self.model_idx
-
-        return device_setter('/gpu:{}'.format(gpu_id))
 
 
 class Network:

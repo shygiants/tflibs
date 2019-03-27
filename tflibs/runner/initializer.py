@@ -184,9 +184,13 @@ class TrainInitializer(ModelInitializer):
                                type=int,
                                default=1,
                                help='Batch size for evaluation')
-        argparser.add_argument('--allow-soft-placement',
+        argparser.add_argument('--no-soft-placement',
                                action='store_true',
                                help='The name of the model to use.')
+        argparser.add_argument('--num-towers',
+                               type=int,
+                               default=1,
+                               help='The number of towers for data augmentation.')
 
     def handle(self, parse_args, unknown):
         """
@@ -203,6 +207,41 @@ class TrainInitializer(ModelInitializer):
         :return: A tuple of a dict of handled arguments and unknown arguments.
         :rtype: tuple
         """
+        save_steps = parse_args.save_steps
+        log_steps = parse_args.log_steps
+        keep_checkpoint_max = parse_args.keep_checkpoint_max
+        random_seed = parse_args.random_seed
+        no_soft_placement = parse_args.no_soft_placement
+        num_towers = parse_args.num_towers
+        train_batch_size = parse_args.train_batch_size
+
+        del parse_args.save_steps
+        del parse_args.log_steps,
+        del parse_args.keep_checkpoint_max
+        del parse_args.random_seed
+        del parse_args.no_soft_placement
+        del parse_args.num_towers
+        del parse_args.train_batch_size
+
+        session_config = tf.ConfigProto(log_device_placement=False,
+                                        allow_soft_placement=not no_soft_placement)
+
+        run_config = tf.estimator.RunConfig(session_config=session_config,
+                                            save_summary_steps=save_steps,
+                                            save_checkpoints_steps=save_steps,
+                                            log_step_count_steps=log_steps,
+                                            keep_checkpoint_max=keep_checkpoint_max,
+                                            tf_random_seed=random_seed)
+
+        if num_towers > 1:
+            if train_batch_size % num_towers != 0:
+                raise ValueError('`train_batch_size` should be divided by `num_towers`.')
+            train_batch_size = train_batch_size // num_towers
+
+            mirrored_strategy = tf.contrib.distribute.MirroredStrategy(
+                cross_tower_ops=tf.contrib.distribute.AllReduceCrossTowerOps(all_reduce_alg='hcopy'))
+            run_config = run_config.replace(train_distribute=mirrored_strategy)
+
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
         model_cls = handled_args['model_cls']  # type: Model
@@ -222,7 +261,7 @@ class TrainInitializer(ModelInitializer):
 
         train_args = vars(train_args)
         train_args.update({'train_iters': parse_args.train_iters,
-                           'train_batch_size': parse_args.train_batch_size})
+                           'train_batch_size': train_batch_size})
 
         eval_args = vars(eval_args)
         eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
@@ -233,28 +272,6 @@ class TrainInitializer(ModelInitializer):
             'eval_args': eval_args,
         }
 
-        save_steps = parse_args.save_steps
-        log_steps = parse_args.log_steps
-        keep_checkpoint_max = parse_args.keep_checkpoint_max
-        random_seed = parse_args.random_seed
-        allow_soft_placement = parse_args.allow_soft_placement
-
-        del parse_args.save_steps
-        del parse_args.log_steps,
-        del parse_args.keep_checkpoint_max
-        del parse_args.random_seed
-        del parse_args.allow_soft_placement
-
-        session_config = tf.ConfigProto(log_device_placement=False,
-                                        allow_soft_placement=allow_soft_placement)
-
-        run_config = tf.estimator.RunConfig().replace(session_config=session_config,
-                                                      save_summary_steps=save_steps,
-                                                      save_checkpoints_steps=save_steps,
-                                                      log_step_count_steps=log_steps,
-                                                      keep_checkpoint_max=keep_checkpoint_max,
-                                                      tf_random_seed=random_seed)
-
         estimator = tf.estimator.Estimator(
             model_cls.model_fn,
             model_dir=parse_args.job_dir,
@@ -262,7 +279,7 @@ class TrainInitializer(ModelInitializer):
             params=model_params)
 
         return {'estimator': estimator,
-                'train_batch_size': parse_args.train_batch_size,
+                'train_batch_size': train_batch_size,
                 'eval_batch_size': parse_args.eval_batch_size,
                 'model_cls': model_cls,
                 'train_map_fn': model_cls.make_map_fn('train', **model_args),
