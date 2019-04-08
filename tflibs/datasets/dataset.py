@@ -236,6 +236,6 @@ class BaseDataset:
                                                          num_parallel_calls=num_parallel_calls_per_read),
                 cycle_length=num_parallel_reads))
 
-            return dataset
+            return dataset.cache()
 
         return dataset_fn

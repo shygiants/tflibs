@@ -35,7 +35,7 @@ class Optimizers(Enum):
 class Optimizer:
     def __init__(self, learning_rate: float, var_scope: str, optimizer=Optimizers.Adam, optimizer_params=None,
                  decay_policy='none',
-                 decay_params=None, summary_gradients=False, clip_gradient=0.):
+                 decay_params=None, summary_gradients=False, clip_gradient=0., warm_up=None):
         if decay_policy == 'none':
             self._learning_rate = learning_rate
         elif decay_policy == 'dying':
@@ -46,6 +46,10 @@ class Optimizer:
             self._learning_rate = self.lambda_decay(learning_rate, **decay_params)
         else:
             raise ValueError('`decay_policy` should be `none`, `dying` or `step`.')
+
+        if warm_up is not None:
+            global_step = tf.train.get_or_create_global_step()
+            self._learning_rate = warm_up(self._learning_rate, global_step)
 
         tf.summary.scalar(var_scope, self._learning_rate, family='Learning_Rates')
 
@@ -92,6 +96,16 @@ class Optimizer:
     def apply_gradients(self, grads_and_vars, global_step=None):
         if self.summary_gradients:
             tf.contrib.training.add_gradients_summaries(grads_and_vars)
+
+        if self._clip_gradient > 0.:
+            g_step = tf.train.get_or_create_global_step() if global_step is None else global_step
+
+            grads = [tf.reduce_any(tf.greater(tf.abs(grad), self._clip_gradient)) for grad, var in grads_and_vars]
+            skip = tf.logical_and(tf.reduce_any(tf.convert_to_tensor(grads)), tf.greater(g_step, 10000))
+
+            grads_and_vars = [(tf.cond(skip, true_fn=lambda: tf.zeros_like(grad), false_fn=lambda: grad), var)
+                              for grad, var in grads_and_vars]
+
         return self.optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
     def apply_tower_gradients(self, tower_grads, global_step=None):
