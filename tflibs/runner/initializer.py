@@ -283,7 +283,8 @@ class TrainInitializer(ModelInitializer):
                 'eval_batch_size': parse_args.eval_batch_size,
                 'model_cls': model_cls,
                 'train_map_fn': model_cls.make_map_fn('train', **model_args),
-                'eval_map_fn': model_cls.make_map_fn('eval', **model_args)}, unknown
+                'eval_map_fn': model_cls.make_map_fn('eval', **model_args),
+                'serving_input_receiver_fn': model_cls.make_map_fn('predict', **model_args), }, unknown
 
 
 class EvalInitializer(ModelInitializer):
