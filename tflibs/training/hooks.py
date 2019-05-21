@@ -8,6 +8,7 @@ from __future__ import print_function
 import threading
 import os
 import collections
+from shutil import copy
 
 import tensorflow as tf
 from tflibs.image import encode
@@ -242,7 +243,14 @@ class BestModelExporter:
         self.saver.save(self.sess, self.ckpt_path)
 
     def export(self):
-        return self.estimator.export_savedmodel(self.estimator.model_dir, self.serving_input_receiver_fn)
+        exported_dir = self.estimator.export_savedmodel(self.estimator.model_dir,
+                                                        self.serving_input_receiver_fn).decode('utf-8')
+
+        ckpt_prefix = tf.train.latest_checkpoint(self.estimator.model_dir)
+        for f in tf.gfile.Glob(ckpt_prefix + '.*'):
+            copy(f, exported_dir)
+
+        return exported_dir
 
 
 class ImageSaverHook(tf.train.SessionRunHook):

@@ -108,6 +108,10 @@ class Optimizer:
 
         return self.optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
+    def minimize(self, loss, global_step=None, colocate_gradients_with_ops=True):
+        grads = self.compute_grad(loss, colocate_gradients_with_ops=colocate_gradients_with_ops)
+        return self.apply_gradients(grads, global_step=global_step)
+
     def apply_tower_gradients(self, tower_grads, global_step=None):
         """
         Returns average gradients.

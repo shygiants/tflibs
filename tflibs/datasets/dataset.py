@@ -197,7 +197,7 @@ class BaseDataset:
             thread = threading.Thread(target=process_wrapper, kwargs=kwargs)
             thread.start()
 
-    def read(self, split=None, num_parallel_reads=16, num_parallel_calls=16):
+    def read(self, split=None, num_parallel_reads=16, num_parallel_calls=16, cache=True):
         """
         Reads tfrecord and makes it tf.data.Dataset
 
@@ -236,6 +236,6 @@ class BaseDataset:
                                                          num_parallel_calls=num_parallel_calls_per_read),
                 cycle_length=num_parallel_reads))
 
-            return dataset.cache()
+            return dataset.cache() if cache else dataset
 
         return dataset_fn
