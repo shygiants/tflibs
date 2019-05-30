@@ -238,8 +238,8 @@ class TrainInitializer(ModelInitializer):
                 raise ValueError('`train_batch_size` should be divided by `num_towers`.')
             train_batch_size = train_batch_size // num_towers
 
-            mirrored_strategy = tf.contrib.distribute.MirroredStrategy(
-                cross_tower_ops=tf.contrib.distribute.AllReduceCrossTowerOps(all_reduce_alg='hcopy'))
+            mirrored_strategy = tf.distribute.MirroredStrategy(
+                cross_device_ops=tf.contrib.distribute.AllReduceCrossDeviceOps(all_reduce_alg='hcopy'))
             run_config = run_config.replace(train_distribute=mirrored_strategy)
 
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)

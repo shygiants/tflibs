@@ -10,15 +10,16 @@ import cv2
 import numpy as np
 
 
-def encode(arr):
+def encode(arr, ext='.png'):
     """
-    Encodes numpy.ndarray into jpeg string
+    Encodes numpy.ndarray into string
 
     :param numpy.ndarray arr: numpy.ndarray of an image
-    :return: jpeg encoded string
+    :param ext:
+    :return: encoded string
     :rtype: str
     """
-    return cv2.imencode('.jpg', arr[:, :, ::-1])[1].tostring()
+    return cv2.imencode(ext, arr[:, :, ::-1])[1].tostring()
 
 
 def decode(string):

@@ -85,7 +85,7 @@ import numpy as np
 from tqdm import tqdm
 
 from tflibs.utils import map_dict, flatten_nested_dict
-from tflibs.datasets.feature_spec import IDSpec
+from tflibs.datasets.feature_spec import IDSpec, FeatureSpec
 
 
 class BaseDataset:
@@ -101,14 +101,13 @@ class BaseDataset:
         if not tf.gfile.Exists(dataset_dir):
             tf.gfile.MakeDirs(dataset_dir)
 
-        self._feature_specs = self._init_feature_specs()
-        self._feature_specs.update({
+    def feature_specs(self, split=None):
+        feature_specs = self._init_feature_specs(split=split)
+        feature_specs.update({
             '_id': IDSpec()
         })
 
-    @property
-    def feature_specs(self):
-        return self._feature_specs
+        return feature_specs
 
     @property
     def tfrecord_filename(self):
@@ -122,7 +121,7 @@ class BaseDataset:
         """
         raise NotImplementedError
 
-    def _init_feature_specs(self):
+    def _init_feature_specs(self, split=None):
         raise NotImplementedError
 
     @classmethod
@@ -145,6 +144,7 @@ class BaseDataset:
         :param int num_parallel_calls:
         :param int test_size:
         """
+        feature_specs = self.feature_specs(split=split)
 
         def process_wrapper(coll, thread_idx):
             # Make tfrecord writer
@@ -166,7 +166,7 @@ class BaseDataset:
 
             for i, elem in tqdm(enumerate(coll), total=len(coll), position=thread_idx):
                 # Process
-                processed = process_fn(elem, self.feature_specs)
+                processed = process_fn(elem, feature_specs)
                 if processed is None:
                     continue
 
@@ -176,7 +176,7 @@ class BaseDataset:
 
                 for processed_e in processed:
                     # Build feature proto
-                    nested_feature = map_dict(lambda k, v: (k, v.feature_proto(processed_e[k])), self.feature_specs)
+                    nested_feature = map_dict(lambda k, v: (k, v.feature_proto(processed_e[k])), feature_specs)
                     # Flatten nested dict
                     feature = flatten_nested_dict(nested_feature)
 
@@ -202,20 +202,24 @@ class BaseDataset:
         Reads tfrecord and makes it tf.data.Dataset
 
         :param split:
+        :param num_parallel_reads:
         :param num_parallel_calls:
+        :param cache:
         :return: A dataset
         """
 
         def dataset_fn():
+            feature_specs = self.feature_specs(split=split)
+
             def parse(record):
-                return map_dict(lambda k, v: (k, v.parse(k, record)), self.feature_specs)
+                return map_dict(lambda k, v: (k, v.parse(k, record)), feature_specs)
 
             fname, ext = os.path.splitext(self.tfrecord_filename)
             fname_pattern = '{fname}{split}*{ext}'
             kwargs = {
                 'fname': fname,
                 'split': '_{split}_'.format(split=split) if split is not None else '_',
-                'ext': ext
+                'ext': ext,
             }
             tfrecord_filepattern = os.path.join(self._dataset_dir, fname_pattern.format(**kwargs))
 

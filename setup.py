@@ -10,10 +10,10 @@ setup(
     ],
     extras_require={
       'dev': [
-          'tensorflow==1.12.0'
+          'tensorflow==1.13.1'
       ]
     },
-    version='0.10.3',
+    version='0.11.0',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',
