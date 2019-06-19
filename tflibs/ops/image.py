@@ -41,9 +41,10 @@ def normalize_images(images):
         return images / tf.reduce_max(images)
 
 
-def concat_images(*list_images, shape=(1, -1)):
+def concat_images(*list_images, shape=(1, -1), normalize=True):
     with tf.name_scope('concat_images', values=list_images):
-        list_images = list(map(normalize_images, list_images))
+        if normalize:
+            list_images = list(map(normalize_images, list_images))
         num_images = len(list_images)
 
         if shape[0] == -1:

@@ -4,6 +4,7 @@ setup(
     name='tflibs',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=[
+        'wheel',
         'tqdm',
         'opencv-python',
         'requests',
@@ -13,7 +14,7 @@ setup(
           'tensorflow==1.13.1'
       ]
     },
-    version='0.11.0',
+    version='0.11.1',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',

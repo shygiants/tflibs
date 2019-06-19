@@ -243,14 +243,20 @@ def residual_block(inputs,
                    non_linear_fn=Nonlinear.ReLU,
                    use_bias=True,
                    scale=1.0,
+                   bottleneck=False,
                    scope=None,
                    reuse=None):
     with tf.variable_scope(scope, 'Residual_Block', values=[inputs], reuse=reuse):
         shortcut = inputs
-        inputs = conv2d(inputs, num_filters, 3,
+        inputs = conv2d(inputs, num_filters, 1 if bottleneck else 3,
                         padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=non_linear_fn, use_bias=use_bias)
         inputs = conv2d(inputs, num_filters, 3,
-                        padding_mode=padding_mode, norm_fn=norm_fn, non_linear_fn=Nonlinear.NONE, use_bias=use_bias)
+                        padding_mode=padding_mode, norm_fn=norm_fn,
+                        non_linear_fn=non_linear_fn if bottleneck else Nonlinear.NONE, use_bias=use_bias)
+
+        if bottleneck:
+            inputs = conv2d(inputs, shortcut.shape.as_list()[-1], 1, padding_mode=padding_mode, norm_fn=norm_fn,
+                            non_linear_fn=Nonlinear.NONE, use_bias=use_bias)
 
         return scale * inputs + shortcut
 

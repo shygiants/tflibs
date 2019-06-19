@@ -81,3 +81,7 @@ def compose_funcs(*funcs):
         return lambda x: f(g(x))
 
     return functools.reduce(compose, funcs, lambda x: x)
+
+
+def list_enum(enum):
+    return list(map(lambda e: e.value, list(enum)))
