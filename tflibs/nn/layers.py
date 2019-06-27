@@ -140,6 +140,8 @@ def conv2d(inputs,
            norm_fn=Norm.Instance,
            non_linear_fn=Nonlinear.ReLU,
            use_bias=True,
+           kernel_initializer=None,
+           bias_initializer=tf.initializers.zeros(),
            scope=None,
            reuse=None):
     with tf.variable_scope(scope, 'Conv2d_{kernel_size}x{kernel_size}_{num_filters}'.format(kernel_size=kernel_size,
@@ -160,7 +162,9 @@ def conv2d(inputs,
                          strides=(strides, strides),
                          dilation_rate=(dilation_rate, dilation_rate),
                          padding='VALID',
-                         use_bias=use_bias)
+                         use_bias=use_bias,
+                         kernel_initializer=kernel_initializer,
+                         bias_initializer=bias_initializer)
 
         # Normalization
         if norm_fn is not None and norm_fn != Norm.Weight:
@@ -187,6 +191,8 @@ def deconv2d(inputs,
              norm_fn=Norm.Layer,
              non_linear_fn=Nonlinear.ReLU,
              use_bias=True,
+             kernel_initializer=None,
+             bias_initializer=tf.initializers.zeros(),
              method=DeconvMethod.NNConv,
              scope=None,
              reuse=None):
@@ -206,14 +212,18 @@ def deconv2d(inputs,
                             padding_mode=padding_mode,
                             norm_fn=norm_fn,
                             non_linear_fn=non_linear_fn,
-                            use_bias=use_bias)
+                            use_bias=use_bias,
+                            kernel_initializer=kernel_initializer,
+                            bias_initializer=bias_initializer)
         elif method == DeconvMethod.ConvTranspose:
             inputs = tf.layers.conv2d_transpose(inputs,
                                                 num_filters,
                                                 kernel_size,
                                                 strides=(strides, strides),
                                                 padding='SAME',
-                                                use_bias=use_bias)
+                                                use_bias=use_bias,
+                                                kernel_initializer=kernel_initializer,
+                                                bias_initializer=bias_initializer)
 
             # Normalization
             if norm_fn is not None:
@@ -230,6 +240,57 @@ def deconv2d(inputs,
         else:
             raise ValueError('`method` should be either {} or {}'.format(DeconvMethod.NNConv,
                                                                          DeconvMethod.ConvTranspose))
+
+        tf.add_to_collection(tf.GraphKeys.ACTIVATIONS, inputs)
+
+        return inputs
+
+
+def depthwise_conv2d(inputs,
+                     kernel_size,
+                     depth_multiplier=1,
+                     strides=1,
+                     padding_mode=Padding.Constant,
+                     norm_fn=Norm.Batch,
+                     non_linear_fn=Nonlinear.ReLU,
+                     use_bias=True,
+                     kernel_initializer='glorot_uniform',
+                     bias_initializer='zeros',
+                     scope=None,
+                     reuse=None):
+    with tf.variable_scope(scope,
+                           'DepthwiseConv2d_{kernel_size}x{kernel_size}_{depth_multiplier}'.format(
+                               kernel_size=kernel_size,
+                               depth_multiplier=depth_multiplier),
+                           values=[inputs], reuse=reuse):
+        # Padding
+        if padding_mode.upper() != Padding.NONE:
+            padding = kernel_size - strides
+            padding = [padding // 2, padding - padding // 2]
+            inputs = tf.pad(inputs, [[0] * 2, padding, padding, [0] * 2], mode=padding_mode)
+
+        # Depthwise Conv
+        depthwise_conv_op = tf.keras.layers.DepthwiseConv2D(kernel_size,
+                                                            depth_multiplier=depth_multiplier,
+                                                            strides=(strides, strides),
+                                                            padding='VALID',
+                                                            use_bias=use_bias,
+                                                            depthwise_initializer=kernel_initializer,
+                                                            bias_initializer=bias_initializer)
+
+        inputs = depthwise_conv_op(inputs)
+
+        # Normalization
+        if norm_fn is not None and norm_fn != Norm.Weight:
+            if not callable(norm_fn):
+                norm_fn = Norm.get(norm_fn)
+            inputs = norm_fn(inputs)
+
+        # Non-linearity
+        if non_linear_fn is not None:
+            if not callable(non_linear_fn):
+                non_linear_fn = Nonlinear.get(non_linear_fn)
+            inputs = non_linear_fn(inputs)
 
         tf.add_to_collection(tf.GraphKeys.ACTIVATIONS, inputs)
 

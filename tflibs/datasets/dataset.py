@@ -72,17 +72,17 @@
 
 
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 import threading
 import argparse
+import itertools
 
 import tensorflow as tf
 import numpy as np
 from tqdm import tqdm
+from pandas import DataFrame
 
 from tflibs.utils import map_dict, flatten_nested_dict
 from tflibs.datasets.feature_spec import IDSpec, FeatureSpec
@@ -135,18 +135,17 @@ class BaseDataset:
         """
         pass
 
-    def write(self, collection: list, process_fn, split=None, num_parallel_calls=16):
+    def write(self, iterable, process_fn, split=None, num_parallel_calls=16, length: int = None):
         """
         Writes examples on tfrecord files
 
-        :param list collection:
+        :param iterable iterable:
         :param function process_fn:
         :param int num_parallel_calls:
-        :param int test_size:
         """
         feature_specs = self.feature_specs(split=split)
 
-        def process_wrapper(coll, thread_idx):
+        def process_wrapper(coll, length, thread_idx):
             # Make tfrecord writer
             fname, ext = os.path.splitext(self.tfrecord_filename)
             fname_pattern = '{fname}{split}{thread_idx:03d}-of-{num_threads:03d}{ext}'
@@ -164,7 +163,7 @@ class BaseDataset:
             else:
                 writer = tf.python_io.TFRecordWriter(tfrecord_filepattern)
 
-            for i, elem in tqdm(enumerate(coll), total=len(coll), position=thread_idx):
+            for elem in tqdm(coll, total=length, position=thread_idx):
                 # Process
                 processed = process_fn(elem, feature_specs)
                 if processed is None:
@@ -187,12 +186,30 @@ class BaseDataset:
                     writer.write(example.SerializeToString())
 
         # Split collection
-        spacing = np.linspace(0, len(collection), num_parallel_calls + 1, dtype=np.int)
-        ranges = zip(spacing[:-1], spacing[1:])
+        def get_spacing(length):
+            return np.linspace(0, length, num_parallel_calls + 1, dtype=np.int)
 
-        for i, rng in enumerate(ranges):
-            kwargs = {'coll': collection[rng[0]:rng[1]],
-                      'thread_idx': i}
+        def get_ranges(length):
+            spacing = get_spacing(length)
+            ranges = zip(spacing[:-1], spacing[1:])
+
+            return ranges
+
+        if isinstance(iterable, list):
+            ranges = get_ranges(len(iterable))
+            colls = [{'coll': iterable[s:e], 'length': e - s} for s, e in ranges]
+        elif isinstance(iterable, DataFrame):
+            spacing = get_spacing(len(iterable))
+            colls = [{'coll': coll.iterrows(), 'length': len(coll)} for coll in np.split(iterable, spacing[1:-1])]
+        elif length is not None:
+            ranges = get_ranges(length)
+            colls = [{'coll': itertools.islice(iterable, s, e), 'length': e - s} for s, e in ranges]
+        else:
+            raise ValueError('`length` should be provided')
+
+        for i, coll in enumerate(colls):
+            kwargs = coll
+            kwargs.update(thread_idx=i)
 
             thread = threading.Thread(target=process_wrapper, kwargs=kwargs)
             thread.start()

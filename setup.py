@@ -8,13 +8,14 @@ setup(
         'tqdm',
         'opencv-python',
         'requests',
+        'pandas',
     ],
     extras_require={
       'dev': [
           'tensorflow==1.13.1'
       ]
     },
-    version='0.11.1',
+    version='0.11.2',
     description='Libraries for easy bootstrapping TensorFlow project',
     author='Sanghoon Yoon',
     author_email='shygiants@gmail.com',
