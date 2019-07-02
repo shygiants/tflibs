@@ -5,6 +5,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from functools import reduce
+from operator import mul
+
 import tensorflow as tf
 import numpy as np
 from enum import Enum
@@ -57,15 +60,8 @@ class FeatureSpec:
             values = [values]
         return tf.train.Feature(float_list=tf.train.FloatList(value=values))
 
-    def __init__(self, shape):
-        self._shape = shape
-
     @property
-    def shape(self):
-        return self._shape
-
-    @property
-    def feature_proto_spec(self):
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -83,21 +79,21 @@ class FeatureSpec:
         :rtype: dict
         """
 
-        def map_fn(k, v):
-            dtype = v['dtype']
-            value = value_dict[k]
+        def make_feature(feature_proto_spec, value):
+            dtype = feature_proto_spec['dtype']
 
             if isinstance(value, np.ndarray):
                 value = value.tolist()
 
             if dtype == tf.string:
-                return k, FeatureSpec._bytes_feature(value)
+                return FeatureSpec._bytes_feature(value)
             elif dtype == tf.float16 or dtype == tf.float32 or dtype == tf.float64:
-                return k, FeatureSpec._float_feature(value)
+                return FeatureSpec._float_feature(value)
             elif dtype == tf.int8 or dtype == tf.int16 or dtype == tf.int32 or dtype == tf.int64:
-                return k, FeatureSpec._int64_feature(value)
+                return FeatureSpec._int64_feature(value)
 
-        return map_dict(map_fn, self.feature_proto_spec)
+        return {k: make_feature(feature_proto_spec, value_dict[k])
+                for k, feature_proto_spec in self.feature_proto_specs.items() if k in value_dict}
 
     def parse(self, parent_key, record):
         """
@@ -109,11 +105,40 @@ class FeatureSpec:
         :rtype: dict
         """
 
-        def parse(k, v):
-            return '{}/{}'.format(parent_key, k), tf.FixedLenFeature(v['shape'], v['dtype'])
+        def make_feature(feature_proto):
+            if 'default' in feature_proto:
+                default_value = feature_proto['default']
+            elif 'required' in feature_proto and not feature_proto['required']:
+                size = reduce(mul, feature_proto['shape'], 1)
+                dtype = feature_proto['dtype']  # type: tf.DType
 
-        features = map_dict(parse, self.feature_proto_spec)
-        return tf.parse_single_example(record, features)
+                if dtype.is_floating:
+                    value = -1.
+                elif dtype.is_integer:
+                    value = -1
+                elif dtype == tf.string:
+                    value = ''
+                else:
+                    raise ValueError('')
+
+                if size == 0:
+                    default_value = value
+                else:
+                    default_value = [value] * size
+            else:
+                default_value = None
+
+            return tf.FixedLenFeature(feature_proto['shape'], feature_proto['dtype'],
+                                      default_value=default_value)
+
+        features = {
+            '{}/{}'.format(parent_key, k): make_feature(feature_spec)
+            for k, feature_spec in self.feature_proto_specs.items()
+        }
+
+        parsed = tf.parse_single_example(record, features)
+
+        return {k.split('/')[-1]: v for k, v in parsed.items()}
 
 
 class ScalarSpec(FeatureSpec):
@@ -139,7 +164,7 @@ class ScalarSpec(FeatureSpec):
             raise ValueError('Invalid dtype')
 
     @property
-    def feature_proto_spec(self):
+    def feature_proto_specs(self):
         return {
             'value': {
                 'shape': (),
@@ -160,11 +185,8 @@ class IDSpec(FeatureSpec):
     """A class for specifying unique ID.
     """
 
-    def __init__(self):
-        super(IDSpec, self).__init__(())
-
     @property
-    def feature_proto_spec(self):
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -189,7 +211,7 @@ class IDSpec(FeatureSpec):
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
-        return parsed['{}/_id'.format(parent_key)]
+        return parsed['_id']
 
     def create_with_string(self, string):
         return {
@@ -201,15 +223,22 @@ class ImageSpec(FeatureSpec):
     """
     A class for specifying image spec
 
-    :param list|tuple image_size: The sizes of images
+    :param list|tuple image_shape: The sizes of images
     """
 
-    def __init__(self, image_size):
-        image_size = list(image_size)
-        super(ImageSpec, self).__init__(image_size)
+    def __init__(self, image_shape):
+        self._image_shape = tuple(image_shape)
 
     @property
-    def feature_proto_spec(self):
+    def image_shape(self):
+        return self._image_shape
+
+    @property
+    def channels(self):
+        return self.image_shape[-1]
+
+    @property
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -233,8 +262,8 @@ class ImageSpec(FeatureSpec):
         :rtype: tf.Tensor
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
-        decoded = tf.image.decode_image(parsed['{}/{}'.format(parent_key, 'encoded')], channels=self.shape[-1])
-        decoded = tf.reshape(decoded, self.shape)
+        decoded = tf.image.decode_image(parsed['encoded'], channels=self.channels)
+        decoded = tf.reshape(decoded, self.image_shape)
 
         return decoded
 
@@ -267,11 +296,10 @@ class VarImageSpec(FeatureSpec):
     """
 
     def __init__(self, channels):
-        super(VarImageSpec, self).__init__(())
         self._channels = channels
 
     @property
-    def feature_proto_spec(self):
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -299,7 +327,7 @@ class VarImageSpec(FeatureSpec):
         :rtype: tf.Tensor
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
-        decoded = tf.image.decode_image(parsed['{}/{}'.format(parent_key, 'encoded')], channels=self.channels)
+        decoded = tf.image.decode_image(parsed['encoded'], channels=self.channels)
         decoded.set_shape((None, None, self.channels))
 
         return decoded
@@ -334,11 +362,15 @@ class LabelSpec(FeatureSpec):
     """
 
     def __init__(self, depth, class_names=None):
-        super(LabelSpec, self).__init__([depth])
+        self._depth = depth
         self._class_names = class_names
 
     @property
-    def feature_proto_spec(self):
+    def depth(self):
+        return self._depth
+
+    @property
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -363,10 +395,10 @@ class LabelSpec(FeatureSpec):
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
-        return tf.one_hot(parsed['{}/{}'.format(parent_key, 'index')], self.shape[0])
+        return tf.one_hot(parsed['index'], self.depth)
 
     def create_with_index(self, index):
-        assert index < self.shape[0]
+        assert index < self.depth
 
         return {
             'index': index
@@ -401,11 +433,15 @@ class MultiLabelSpec(FeatureSpec):
     """
 
     def __init__(self, depth, class_names=None):
-        super(MultiLabelSpec, self).__init__([depth])
+        self._depth = depth
         self._class_names = class_names
 
     @property
-    def feature_proto_spec(self):
+    def depth(self):
+        return self._depth
+
+    @property
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -414,7 +450,7 @@ class MultiLabelSpec(FeatureSpec):
         """
         return {
             'tensor': {
-                'shape': self.shape,
+                'shape': (self.depth,),
                 'dtype': tf.int64
             }
         }
@@ -443,7 +479,7 @@ class MultiLabelSpec(FeatureSpec):
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
-        return parsed['{}/{}'.format(parent_key, 'tensor')]
+        return parsed['tensor']
 
     def create_with_tensor(self, tensor):
         # TODO: Assert shape
@@ -468,7 +504,7 @@ class EnumSpec(FeatureSpec):
         self.enum = enum_cls
 
     @property
-    def feature_proto_spec(self):
+    def feature_proto_specs(self):
         """
         A property for specifying inner encoding spec of the feature
 
@@ -493,7 +529,7 @@ class EnumSpec(FeatureSpec):
         """
         parsed = FeatureSpec.parse(self, parent_key, record)
 
-        return parsed['{}/enum'.format(parent_key)]
+        return parsed['enum']
 
     def create_with_string(self, string: str):
         if string not in [lambda e: e.value, list(self.enum)]:

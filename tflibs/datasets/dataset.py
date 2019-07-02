@@ -175,7 +175,8 @@ class BaseDataset:
 
                 for processed_e in processed:
                     # Build feature proto
-                    nested_feature = map_dict(lambda k, v: (k, v.feature_proto(processed_e[k])), feature_specs)
+                    nested_feature = {k: feature_spec.feature_proto(processed_e[k]) for k, feature_spec in
+                                      feature_specs.items() if k in processed_e}
                     # Flatten nested dict
                     feature = flatten_nested_dict(nested_feature)
 
@@ -207,12 +208,19 @@ class BaseDataset:
         else:
             raise ValueError('`length` should be provided')
 
+        threads = []
         for i, coll in enumerate(colls):
             kwargs = coll
             kwargs.update(thread_idx=i)
 
             thread = threading.Thread(target=process_wrapper, kwargs=kwargs)
+            threads.append(thread)
             thread.start()
+
+        for i, thread in enumerate(threads):
+            tf.logging.info('Waiting for joining thread {}'.format(i))
+            thread.join()
+            tf.logging.info('Thread {} is joined'.format(i))
 
     def read(self, split=None, num_parallel_reads=16, num_parallel_calls=16, cache=True):
         """
@@ -229,7 +237,7 @@ class BaseDataset:
             feature_specs = self.feature_specs(split=split)
 
             def parse(record):
-                return map_dict(lambda k, v: (k, v.parse(k, record)), feature_specs)
+                return {k: feature_spec.parse(k, record) for k, feature_spec in feature_specs.items()}
 
             fname, ext = os.path.splitext(self.tfrecord_filename)
             fname_pattern = '{fname}{split}*{ext}'

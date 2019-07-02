@@ -325,12 +325,7 @@ class EvalInitializer(ModelInitializer):
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
         model_cls = handled_args['model_cls']
-
-        # Parse model-specific arguments
-        parser = argparse.ArgumentParser()
-        model_cls.add_model_args(parser, parse_args)
-        model_args, unknown = parser.parse_known_args(unknown)
-        log_parse_args(model_args, 'Model arguments')
+        model_args = handled_args['model_args']
 
         # Parse model-specific eval arguments
         parser = argparse.ArgumentParser()
@@ -342,7 +337,7 @@ class EvalInitializer(ModelInitializer):
         eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
 
         model_params = {
-            'model_args': vars(model_args),
+            'model_args': model_args,
             'eval_args': eval_args,
         }
 
@@ -364,4 +359,4 @@ class EvalInitializer(ModelInitializer):
         return {'estimator': estimator,
                 'eval_batch_size': parse_args.eval_batch_size,
                 'model_cls': model_cls,
-                'eval_map_fn': model_cls.make_map_fn('eval', **vars(model_args))}, unknown
+                'eval_map_fn': model_cls.make_map_fn('eval', **model_args)}, unknown
