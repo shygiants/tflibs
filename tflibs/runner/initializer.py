@@ -214,6 +214,7 @@ class TrainInitializer(ModelInitializer):
         no_soft_placement = parse_args.no_soft_placement
         num_towers = parse_args.num_towers
         train_batch_size = parse_args.train_batch_size
+        eval_batch_size = parse_args.eval_batch_size
 
         del parse_args.save_steps
         del parse_args.log_steps,
@@ -234,13 +235,14 @@ class TrainInitializer(ModelInitializer):
                                             tf_random_seed=random_seed)
 
         if num_towers > 1:
-            if train_batch_size % num_towers != 0:
-                raise ValueError('`train_batch_size` should be divided by `num_towers`.')
+            if train_batch_size % num_towers != 0 or eval_batch_size % num_towers != 0:
+                raise ValueError('`train_batch_size` and `eval_batch_size` should be divided by `num_towers`.')
             train_batch_size = train_batch_size // num_towers
+            eval_batch_size = eval_batch_size // num_towers
 
             mirrored_strategy = tf.distribute.MirroredStrategy(
                 cross_device_ops=tf.contrib.distribute.AllReduceCrossDeviceOps(all_reduce_alg='hcopy'))
-            run_config = run_config.replace(train_distribute=mirrored_strategy)
+            run_config = run_config.replace(train_distribute=mirrored_strategy, eval_distribute=mirrored_strategy)
 
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
@@ -264,7 +266,7 @@ class TrainInitializer(ModelInitializer):
                            'train_batch_size': train_batch_size})
 
         eval_args = vars(eval_args)
-        eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
+        eval_args.update({'eval_batch_size': eval_batch_size})
 
         model_params = {
             'model_args': model_args,
@@ -280,7 +282,7 @@ class TrainInitializer(ModelInitializer):
 
         return {'estimator': estimator,
                 'train_batch_size': train_batch_size,
-                'eval_batch_size': parse_args.eval_batch_size,
+                'eval_batch_size': eval_batch_size,
                 'model_cls': model_cls,
                 'train_map_fn': model_cls.make_map_fn('train', **model_args),
                 'eval_map_fn': model_cls.make_map_fn('eval', **model_args),
@@ -304,9 +306,13 @@ class EvalInitializer(ModelInitializer):
                                type=int,
                                default=1,
                                help='Batch size for evaluation')
-        argparser.add_argument('--allow-soft-placement',
+        argparser.add_argument('--no-soft-placement',
                                action='store_true',
                                help='The name of the model to use.')
+        argparser.add_argument('--num-towers',
+                               type=int,
+                               default=1,
+                               help='The number of towers for data augmentation.')
 
     def handle(self, parse_args, unknown):
         """
@@ -322,6 +328,13 @@ class EvalInitializer(ModelInitializer):
         :return: A tuple of a dict of handled arguments and unknown arguments.
         :rtype: tuple
         """
+        num_towers = parse_args.num_towers
+        eval_batch_size = parse_args.eval_batch_size
+        no_soft_placement = parse_args.no_soft_placement
+
+        del parse_args.num_towers
+        del parse_args.no_soft_placement
+
         handled_args, unknown = ModelInitializer.handle(self, parse_args, unknown)
 
         model_cls = handled_args['model_cls']
@@ -334,21 +347,26 @@ class EvalInitializer(ModelInitializer):
         log_parse_args(eval_args, 'Eval arguments')
 
         eval_args = vars(eval_args)
-        eval_args.update({'eval_batch_size': parse_args.eval_batch_size})
+        eval_args.update({'eval_batch_size': eval_batch_size})
 
         model_params = {
             'model_args': model_args,
             'eval_args': eval_args,
         }
 
-        allow_soft_placement = parse_args.allow_soft_placement
-
-        del parse_args.allow_soft_placement
-
         session_config = tf.ConfigProto(log_device_placement=False,
-                                        allow_soft_placement=allow_soft_placement)
+                                        allow_soft_placement=not no_soft_placement)
 
         run_config = tf.estimator.RunConfig().replace(session_config=session_config)
+
+        if num_towers > 1:
+            if eval_batch_size % num_towers != 0:
+                raise ValueError('`eval_batch_size` should be divided by `num_towers`.')
+            eval_batch_size = eval_batch_size // num_towers
+
+            mirrored_strategy = tf.distribute.MirroredStrategy(
+                cross_device_ops=tf.contrib.distribute.AllReduceCrossDeviceOps(all_reduce_alg='hcopy'))
+            run_config = run_config.replace(eval_distribute=mirrored_strategy)
 
         estimator = tf.estimator.Estimator(
             model_cls.model_fn,
@@ -357,6 +375,6 @@ class EvalInitializer(ModelInitializer):
             params=model_params)
 
         return {'estimator': estimator,
-                'eval_batch_size': parse_args.eval_batch_size,
+                'eval_batch_size': eval_batch_size,
                 'model_cls': model_cls,
                 'eval_map_fn': model_cls.make_map_fn('eval', **model_args)}, unknown

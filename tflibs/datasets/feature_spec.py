@@ -499,8 +499,6 @@ class EnumSpec(FeatureSpec):
     """
 
     def __init__(self, enum_cls):
-        super(EnumSpec, self).__init__(())
-
         self.enum = enum_cls
 
     @property
