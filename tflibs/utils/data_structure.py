@@ -1,18 +1,13 @@
 """
     Utils
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import functools
-
-from tflibs.utils.decorators import unpack_tuple
 
 
 class Attributes:
     def __init__(self, **attrs):
         self.update(**attrs)
+        self._attrs = attrs
 
     def update(self, **attrs):
         for name, value in attrs.items():
@@ -20,6 +15,10 @@ class Attributes:
 
     def __getattr__(self, item):
         raise AttributeError
+
+    @property
+    def __dict__(self):
+        return self._attrs
 
 
 class LambdaAttributes:
@@ -46,26 +45,18 @@ def _prepend(key, dic):
     return dict(items)
 
 
-def flatten_nested_dict(nested_dict):
+def flatten_nested_dict(nested_dict: dict) -> dict:
     flatten_dict = dict(_nested_dict_item_gen(nested_dict))
     return flatten_dict
 
 
-def _nested_dict_item_gen(nested_dict):
+def _nested_dict_item_gen(nested_dict: dict):
     for (k, v) in nested_dict.items():
         if not isinstance(v, dict):
             yield (k, v)
         else:
             for (inner_k, inner_v) in _nested_dict_item_gen(v):
                 yield ('{}/{}'.format(k, inner_k), inner_v)
-
-
-def map_dict(map_fn, original_dict):
-    return dict(map(unpack_tuple(map_fn), original_dict.items()))
-
-
-def filter_dict(fn, dic: dict):
-    return dict(filter(unpack_tuple(fn), dic.items()))
 
 
 def param_consumer(arg_names, params, unpack=False):

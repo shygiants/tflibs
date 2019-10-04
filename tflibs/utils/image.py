@@ -2,15 +2,11 @@
     Image utils
     ~~~~~~~~~~~
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import cv2
 import numpy as np
 
 
-def encode(arr, ext='.png'):
+def imencode(arr: np.ndarray, ext='.png') -> str:
     """
     Encodes numpy.ndarray into string
 
@@ -22,7 +18,7 @@ def encode(arr, ext='.png'):
     return cv2.imencode(ext, arr[:, :, ::-1])[1].tostring()
 
 
-def decode(string):
+def imdecode(string: str) -> np.ndarray:
     """
     Decodes jpeg string into numpy.ndarray
 

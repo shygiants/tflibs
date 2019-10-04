@@ -1,37 +1,73 @@
 """ Decorators """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from typing import Callable, TypeVar
+from functools import wraps
 
 import tensorflow as tf
 
-
-def name_scope(original_fn=None, name=None):
-    def decorator(original_fn):
-        def wrapper(*args, **kwargs):
-            with tf.name_scope(name or original_fn.__name__):
-                return original_fn(*args, **kwargs)
-
-        return wrapper
-
-    if original_fn is not None:
-        if name is not None:
-            raise ValueError('Bad usage')
-
-        return decorator(original_fn)
-    else:
-        return decorator
+T = TypeVar('T')
 
 
-def strip_dict_arg(original_fn):
-    def wrapper(arg):
-        return original_fn(**arg)
+class CachedProperty:
+    def __init__(self, fget: Callable):
+        self.fget = fget
+
+    @property
+    def fget(self) -> Callable:
+        return self._fget
+
+    @fget.setter
+    def fget(self, fn):
+        self._fget = fn
+        self._name = fn.__name__
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def __get__(self, instance, owner) -> T:
+        """
+        Called once when the corresponding property is first accessed, and sets the value as attribute.
+        :param instance:
+        :param owner:
+        :return: Value of the property
+        """
+        val = self.fget(instance)  # type: T
+
+        setattr(instance, self.name, val)
+
+        return val
+
+
+def coroutine(f: Callable):
+    @wraps(f)
+    async def wrapper(*args, **kwargs):
+        return f(*args, **kwargs)
 
     return wrapper
 
 
-def unpack_tuple(original_fn):
+def distributed_run(strategy: tf.distribute.MirroredStrategy, run_eager=False):
+    def decorator(f: Callable):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return strategy.experimental_run_v2(f, args=args, kwargs=kwargs)
+
+        return tf.function(wrapper) if not run_eager else wrapper
+
+    return decorator
+
+
+def unpack_tuple(original_fn: Callable):
+    @wraps(original_fn)
     def wrapper(tup):
         return original_fn(*tup)
+
+    return wrapper
+
+
+def unpack_dict(original_fn: Callable):
+    @wraps(original_fn)
+    def wrapper(dic):
+        return original_fn(**dic)
 
     return wrapper

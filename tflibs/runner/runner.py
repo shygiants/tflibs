@@ -1,50 +1,27 @@
 """
     Runner
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import argparse
-import functools
 
 import tensorflow as tf
+import yaml
 
-from tflibs.utils import log_parse_args
+from tflibs.utils import Attributes
 
 
 class Runner:
-    """
-    Initialize all the artifacts by resolving initializers
+    def __init__(self, use_strategy=True, use_global_step=True, use_summary=True, ignore_unknown=False):
+        self._use_strategy = use_strategy
+        self._use_global_step = use_global_step
+        self._use_summary = use_summary
+        self._ignore_unknown = ignore_unknown
 
-    :param initializers: Initializers
-    :param default_job_dir: Default job directory
-    """
-
-    def __init__(self, initializers=[], default_job_dir='/tmp/job-dir', no_job_dir=False):
-        self._initializers = initializers
         self._argparser = argparse.ArgumentParser()
-        self._no_job_dir = no_job_dir
 
-        if not no_job_dir:
-            #################
-            # Job Directory #
-            #################
-            self.argparser.add_argument('--job-dir',
-                                        type=str,
-                                        default=default_job_dir,
-                                        help="""
-                                            GCS or local dir for checkpoints, exports, and
-                                            summaries. Use an existing directory to load a
-                                            trained model, or a new directory to retrain""")
-            self.argparser.add_argument('--run-name',
-                                        required=True,
-                                        type=str,
-                                        help='The run name.')
-        ##############
-        # Run Config #
-        ##############
+        self.argparser.add_argument('--config-path',
+                                    type=str,
+                                    help='')
         self.argparser.add_argument('--verbosity',
                                     choices=[
                                         'DEBUG',
@@ -56,60 +33,72 @@ class Runner:
                                     default='INFO',
                                     help='Set logging verbosity')
 
-        for initializers in self._initializers:
-            initializers.add_arguments(self.argparser)
+    @property
+    def use_strategy(self):
+        return self._use_strategy
 
-    def run(self, main):
-        """
-        Run
+    @property
+    def use_global_step(self):
+        return self._use_global_step
 
-        :param function main: main function to run
-        """
-        parse_args, unknown = self.argparser.parse_known_args()
+    @property
+    def use_summary(self):
+        return self._use_summary
 
-        # Set python level verbosity
-        tf.logging.set_verbosity(parse_args.verbosity)
-        # Set C++ Graph Execution level verbosity
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(
-            tf.logging.__dict__[parse_args.verbosity] / 10)
-        del parse_args.verbosity
-
-        log_parse_args(parse_args, 'Runner arguments')
-
-        if not self._no_job_dir:
-            # Set job directory
-            job_dir = parse_args.job_dir
-            run_name = parse_args.run_name
-
-            handled = {
-                'job_dir': os.path.join(job_dir, run_name)
-            }
-            del parse_args.job_dir
-            del parse_args.run_name
-        else:
-            handled = {}
-
-        handled.update(vars(parse_args))
-        parse_args = argparse.Namespace(**handled)
-
-        # Handle arguments with initializer
-        def handle(reducing, initializer):
-            parse_args, unknown = reducing
-            handled, unknown = initializer.handle(parse_args, unknown)
-            handled.update(vars(parse_args))
-            return argparse.Namespace(**handled), unknown
-
-        handled_args, unknown = functools.reduce(handle,
-                                                 self._initializers,
-                                                 (parse_args, unknown))
-
-        if unknown:
-            raise ValueError('Unknown arguments: {}'.format(unknown))
-
-        log_parse_args(handled_args, 'Final arguments')
-
-        main(**vars(handled_args))
+    @property
+    def ignore_unknown(self):
+        return self._ignore_unknown
 
     @property
     def argparser(self):
         return self._argparser
+
+    def run(self, main, yaml_doc=None):
+        parse_args, unknown = self.argparser.parse_known_args()
+
+        # Set python level verbosity
+        tf.compat.v1.logging.set_verbosity(parse_args.verbosity)
+        # Set C++ Graph Execution level verbosity
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(
+            tf.compat.v1.logging.__dict__[parse_args.verbosity] / 10)
+        del parse_args.verbosity
+
+        if unknown and not self.ignore_unknown:
+            raise ValueError('Unknown arguments: {}'.format(unknown))
+
+        #######
+        # RUN #
+        #######
+        if yaml_doc is None:
+            with open(parse_args.config_path) as f:
+                yaml_doc = f.read()
+
+        args = {}
+
+        def run():
+            if self.use_global_step:
+                global_step = tf.Variable(1, dtype=tf.int64)
+                args.update(global_step=global_step)
+
+            config = yaml.load(yaml_doc, Loader=yaml.Loader)
+            # TODO: Log config
+            tf.compat.v1.logging.info(yaml_doc)
+            config = Attributes(**config)
+
+            if self.use_summary:
+                summary_dir = config.job_dir
+                train_writer = tf.summary.create_file_writer(summary_dir)
+                eval_writer = tf.summary.create_file_writer(os.path.join(summary_dir, 'eval'))
+                args.update(train_writer=train_writer, eval_writer=eval_writer)
+
+            main(**args, **vars(config))
+
+        if self.use_strategy:
+            strategy = tf.distribute.MirroredStrategy()
+            args.update(strategy=strategy)
+
+            with strategy.scope():
+                run()
+
+        else:
+            run()

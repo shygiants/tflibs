@@ -1,19 +1,15 @@
 """
     See the guides: `Dataset <./Dataset.html>`_
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from functools import reduce
 from operator import mul
+from typing import Dict
 
 import tensorflow as tf
 import numpy as np
 from enum import Enum
 
-from tflibs.utils import map_dict
-from tflibs import image as tfimage
+from tflibs.utils import CachedProperty, imdecode, imencode
 
 
 class FeatureSpec:
@@ -60,6 +56,13 @@ class FeatureSpec:
             values = [values]
         return tf.train.Feature(float_list=tf.train.FloatList(value=values))
 
+    def __init__(self, required=True):
+        self._required = required
+
+    @property
+    def required(self):
+        return self._required
+
     @property
     def feature_proto_specs(self):
         """
@@ -70,7 +73,7 @@ class FeatureSpec:
         """
         raise NotImplementedError
 
-    def feature_proto(self, value_dict):
+    def build_feature_protos(self, value_dict: dict) -> dict:
         """
         Returns a dict of `tf.train.Feature` proto corresponding to `feature_proto_spec`
 
@@ -79,7 +82,7 @@ class FeatureSpec:
         :rtype: dict
         """
 
-        def make_feature(feature_proto_spec, value):
+        def build_feature_proto(feature_proto_spec, value):
             dtype = feature_proto_spec['dtype']
 
             if isinstance(value, np.ndarray):
@@ -87,30 +90,22 @@ class FeatureSpec:
 
             if dtype == tf.string:
                 return FeatureSpec._bytes_feature(value)
-            elif dtype == tf.float16 or dtype == tf.float32 or dtype == tf.float64:
+            elif dtype.is_floating:
                 return FeatureSpec._float_feature(value)
-            elif dtype == tf.int8 or dtype == tf.int16 or dtype == tf.int32 or dtype == tf.int64:
+            elif dtype.is_integer:
                 return FeatureSpec._int64_feature(value)
 
-        return {k: make_feature(feature_proto_spec, value_dict[k])
+        return {k: build_feature_proto(feature_proto_spec, value_dict[k])
                 for k, feature_proto_spec in self.feature_proto_specs.items() if k in value_dict}
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns dict of `tf.Tensor`
-
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: A dict of tensors as specified at `feature_proto_spec`
-        :rtype: dict
-        """
-
-        def make_feature(feature_proto):
-            if 'default' in feature_proto:
-                default_value = feature_proto['default']
-            elif 'required' in feature_proto and not feature_proto['required']:
-                size = reduce(mul, feature_proto['shape'], 1)
-                dtype = feature_proto['dtype']  # type: tf.DType
+    @CachedProperty
+    def features(self) -> Dict[str, tf.io.FixedLenFeature]:
+        def build_feature(feature_proto_spec):
+            if 'default' in feature_proto_spec:
+                default_value = feature_proto_spec['default']
+            elif 'required' in feature_proto_spec and not feature_proto_spec['required']:
+                size = reduce(mul, feature_proto_spec['shape'], 1)
+                dtype = feature_proto_spec['dtype']  # type: tf.DType
 
                 if dtype.is_floating:
                     value = -1.
@@ -128,22 +123,18 @@ class FeatureSpec:
             else:
                 default_value = None
 
-            return tf.FixedLenFeature(feature_proto['shape'], feature_proto['dtype'],
-                                      default_value=default_value)
+            return tf.io.FixedLenFeature(feature_proto_spec['shape'], feature_proto_spec['dtype'],
+                                         default_value=default_value)
 
-        features = {
-            '{}/{}'.format(parent_key, k): make_feature(feature_spec)
-            for k, feature_spec in self.feature_proto_specs.items()
-        }
+        return {k: build_feature(feature_spec) for k, feature_spec in self.feature_proto_specs.items()}
 
-        parsed = tf.parse_single_example(record, features)
-
-        return {k.split('/')[-1]: v for k, v in parsed.items()}
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        raise NotImplementedError
 
 
 class ScalarSpec(FeatureSpec):
-    def __init__(self, dtype):
-        super(ScalarSpec, self).__init__(())
+    def __init__(self, dtype: tf.DType):
+        super(ScalarSpec, self).__init__()
         self._dtype = dtype
 
     @property
@@ -152,7 +143,7 @@ class ScalarSpec(FeatureSpec):
 
     @property
     def pydtype(self):
-        tfdtype = self._dtype  # type: tf.DType
+        tfdtype = self._dtype
 
         if tfdtype.is_integer:
             return int
@@ -172,13 +163,16 @@ class ScalarSpec(FeatureSpec):
             }
         }
 
-    def create_with_value(self, value):
+    def create_with_value(self, value) -> dict:
         if not isinstance(value, self.pydtype):
             value = self.pydtype(value)
 
-        return {
+        return self.build_feature_protos({
             'value': value
-        }
+        })
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        return parsed['value']
 
 
 class IDSpec(FeatureSpec):
@@ -200,23 +194,13 @@ class IDSpec(FeatureSpec):
             }
         }
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns `tf.Tensor`
-
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: A scalar tensor containing an id
-        :rtype: tf.Tensor
-        """
-        parsed = FeatureSpec.parse(self, parent_key, record)
-
-        return parsed['_id']
-
-    def create_with_string(self, string):
-        return {
+    def create_with_string(self, string: str) -> dict:
+        return self.build_feature_protos({
             '_id': string
-        }
+        })
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        return parsed['_id']
 
 
 class ImageSpec(FeatureSpec):
@@ -252,40 +236,35 @@ class ImageSpec(FeatureSpec):
             }
         }
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns `tf.Tensor`
+    def create_with_path(self, path: str) -> dict:
+        with open(path, 'r') as f:
+            decoded = imdecode(f.read())
+            assert decoded.shape[0] == self.image_shape[0] and decoded.shape[1] == self.image_shape[1]
 
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: A 3-D tensor containing an image
-        :rtype: tf.Tensor
-        """
-        parsed = FeatureSpec.parse(self, parent_key, record)
-        decoded = tf.image.decode_image(parsed['encoded'], channels=self.channels)
+            return self.build_feature_protos({
+                'encoded': imencode(decoded)
+            })
+
+    def create_with_tensor(self, arr: np.ndarray) -> dict:
+        assert arr.shape[0] == self.image_shape[0] and arr.shape[1] == self.image_shape[1]
+
+        return self.build_feature_protos({
+            'encoded': imencode(arr)
+        })
+
+    def create_with_contents(self, contents: str) -> dict:
+        decoded = imdecode(contents)
+        assert decoded.shape[0] == self.image_shape[0] and decoded.shape[1] == self.image_shape[1]
+
+        return self.build_feature_protos({
+            'encoded': imencode(decoded)
+        })
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        decoded = tf.image.decode_png(parsed['encoded'], channels=self.channels)
         decoded = tf.reshape(decoded, self.image_shape)
 
         return decoded
-
-    def create_with_path(self, path):
-        # TODO: Assert shape
-        with open(path, 'rb') as f:
-            return {
-                'encoded': f.read()
-            }
-
-    def create_with_tensor(self, tensor):
-        # TODO: Assert shape
-        return {
-            'encoded': tfimage.encode(tensor)
-        }
-
-    def create_with_contents(self, contents):
-        # TODO: Assert shape
-
-        return {
-            'encoded': contents
-        }
 
 
 class VarImageSpec(FeatureSpec):
@@ -317,40 +296,27 @@ class VarImageSpec(FeatureSpec):
     def channels(self):
         return self._channels
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns `tf.Tensor`
+    def create_with_path(self, path: str) -> dict:
+        with open(path, 'rb') as f:
+            return self.build_feature_protos({
+                'encoded': f.read()
+            })
 
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: A 3-D tensor containing an image
-        :rtype: tf.Tensor
-        """
-        parsed = FeatureSpec.parse(self, parent_key, record)
+    def create_with_tensor(self, tensor: np.ndarray) -> dict:
+        return self.build_feature_protos({
+            'encoded': tfimage.encode(tensor)
+        })
+
+    def create_with_contents(self, contents: str) -> dict:
+        return self.build_feature_protos({
+            'encoded': contents
+        })
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
         decoded = tf.image.decode_image(parsed['encoded'], channels=self.channels)
         decoded.set_shape((None, None, self.channels))
 
         return decoded
-
-    def create_with_path(self, path):
-        # TODO: Assert shape
-        with open(path, 'rb') as f:
-            return {
-                'encoded': f.read()
-            }
-
-    def create_with_tensor(self, tensor):
-        # TODO: Assert shape
-        return {
-            'encoded': tfimage.encode(tensor)
-        }
-
-    def create_with_contents(self, contents):
-        # TODO: Assert shape
-
-        return {
-            'encoded': contents
-        }
 
 
 class LabelSpec(FeatureSpec):
@@ -361,7 +327,7 @@ class LabelSpec(FeatureSpec):
     :param list class_names: A list of `str` which describes each labels
     """
 
-    def __init__(self, depth, class_names=None):
+    def __init__(self, depth: int, class_names=None):
         self._depth = depth
         self._class_names = class_names
 
@@ -384,31 +350,18 @@ class LabelSpec(FeatureSpec):
             }
         }
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns `tf.Tensor`
-
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: An 1-D tensor containing label
-        :rtype: tf.Tensor
-        """
-        parsed = FeatureSpec.parse(self, parent_key, record)
-
-        return tf.one_hot(parsed['index'], self.depth)
-
-    def create_with_index(self, index):
+    def create_with_index(self, index: int) -> dict:
         assert index < self.depth
 
-        return {
+        return self.build_feature_protos({
             'index': index
-        }
+        })
 
-    def create_with_label(self, label):
+    def create_with_label(self, label) -> dict:
         # TODO: Assert bad labels don't exist
-        return {
+        return self.build_feature_protos({
             'index': self._class_names.index(label)
-        }
+        })
 
     @classmethod
     def from_class_names(cls, class_names):
@@ -422,6 +375,9 @@ class LabelSpec(FeatureSpec):
         obj = cls(len(class_names), class_names)
 
         return obj
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        return tf.one_hot(parsed['index'], self.depth)
 
 
 class MultiLabelSpec(FeatureSpec):
@@ -468,34 +424,27 @@ class MultiLabelSpec(FeatureSpec):
 
         return obj
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns `tf.Tensor`
-
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: A 1-D tensor containing label
-        :rtype: tf.Tensor
-        """
-        parsed = FeatureSpec.parse(self, parent_key, record)
-
-        return parsed['tensor']
-
-    def create_with_tensor(self, tensor):
+    def create_with_tensor(self, tensor) -> dict:
         # TODO: Assert shape
-        return {
+        return self.build_feature_protos({
             'tensor': tensor
-        }
+        })
 
-    def create_with_labels(self, labels):
+    def create_with_labels(self, labels) -> dict:
         # TODO: Assert bad labels don't exist
-        return {
+        return self.build_feature_protos({
             'tensor': list(map(lambda cls: int(cls in labels), self._class_names))
-        }
+        })
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        return parsed['tensor']
 
 
 class EnumSpec(FeatureSpec):
-    """A class for specifying enum.
+    """
+    A class for specifying enum.
+
+    :param enum_cls:
     """
 
     def __init__(self, enum_cls):
@@ -516,28 +465,18 @@ class EnumSpec(FeatureSpec):
             }
         }
 
-    def parse(self, parent_key, record):
-        """
-        Parse TF-record and returns `tf.Tensor`
-
-        :param str parent_key: The key of the feature
-        :param tf.Tensor record: String tensor of TF-record
-        :return: A scalar tensor containing an id
-        :rtype: tf.Tensor
-        """
-        parsed = FeatureSpec.parse(self, parent_key, record)
-
-        return parsed['enum']
-
-    def create_with_string(self, string: str):
+    def create_with_string(self, string: str) -> dict:
         if string not in [lambda e: e.value, list(self.enum)]:
             raise ValueError('String should be one of members ({})'.format(list(self.enum)))
 
-        return {
+        return self.build_feature_protos({
             'enum': string,
-        }
+        })
 
-    def create_with_member(self, member: Enum):
-        return {
+    def create_with_member(self, member: Enum) -> dict:
+        return self.build_feature_protos({
             'enum': member.value,
-        }
+        })
+
+    def build_tensor(self, parsed: Dict[str, tf.Tensor]):
+        return parsed['enum']
